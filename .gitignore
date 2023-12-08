@@ -26,7 +26,6 @@
 *.sql
 *.sqlite
 .history/
-.vscode/
 # OS generated files #
 ######################
 .DS_Store

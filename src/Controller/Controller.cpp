@@ -1,97 +1,34 @@
-#include "LateralControl.h"
+#include "Controller.h"
 #include <cmath>
 namespace aiforce {
 namespace control{
 
 
-Lateral_Control::Lateral_Control()
-    :
-      factor_str_kp(1.0),
-      factor_str_ki(1.0),
-      factor_str_kd(1.0),
-      factor_ridge_kp(1.0),
-      factor_ridge_ki(1.0),
-      factor_ridge_kd(1.0),
+Controller::Controller():
       PreTurn_(true),
       refpath_limitnum(30),
-      Last_TargetAngle_(0),
       max_angle_(30),
       min_angle_(-30),
-      gap_(0.2),
-      fst_in_autodriving(true),
-      fst_in_lateral_control_(true){}
+      gap_(0.2){}
 
-/**
- * @brief 函数简要说明-测试函数
- * @param index    参数1
- * @param t        参数2 @see CTest
- *
- * @return 返回说明
- *     -<em>false</em> fail
- *     -<em>true</em> succeed
- */
-float Lateral_Control::GetTargetSteer(vector<decision::SinglePoint> msg,
-                                      int Pts_Num,
-                                      float CurrentSpeed,
-                                      float Yaw_rate,
-                                      float WheelBase,
-                                      int driving_mode_,
-                                      int rnd_gear_,
-                                      int wk_type,
-                                      int machine_type)
-{
+
+void Controller::Controller_preprocessor(vector<decision::SinglePoint> msg,
+                         int Pts_Num,
+                         double currentspeed,
+                         float yaw_rate,
+                         float WheelBase,
+                         int driving_mode_, //0：手动驾驶， 1:自动驾驶，2:导航模式
+                         int rnd_gear_){
     PreTurn_=true; // 路径是否连续控制处理
     Driving_mode_=driving_mode_;
     RND_gear_=rnd_gear_;
-    if(fst_in_autodriving)
-    {
-        fst_in_autodriving=false;
-    }
-    
+    avgfilt.setting_num(currentspeed);
     bool path_flag=UpdatePath(msg);
 
-    if(!path_flag)
-    {
-        return Last_TargetAngle_;
-    }
-
     State cur_state(0,0,PI/2);   //(x,y,posture) x沿车身方向 y垂直车身方向 xy满足右手定则
+    cur_state.x=WheelBase;
+                         }
 
-    if(Driving_mode_==2&&RND_gear_==0)
-    {
-        cur_state.x=-wheel_base_dist_;
-    }
-    else
-    {
-        cur_state.x=wheel_base_dist_;
-    }
-
-
-    double calculate_angle=0;
-    /*********** Stanley ***********/
-    double k_stanley=2;
-    if(fst_in_autodriving)
-    {
-    }    //                    k_psi,        k_dist,    k_soft,       k_yaw_rate,     kd
-    stanley.set_parameter(factor_str_kp,factor_str_ki,factor_str_kd,factor_ridge_kp,factor_ridge_ki);
-    stanley.cur_speed=CurrentSpeed;
-    stanley.yaw_rate=Yaw_rate;
-    calculate_angle=stanley.stanleyControl(cur_state,CurrentSpeed,wheel_base_dist_,RefState_);
-
-    avgfilt.setting_num(CurrentSpeed);
-    calculate_angle = avgfilt.average_filter(calculate_angle);
-
-    calculate_angle=normalizeAngle(calculate_angle);
-    
-    // within limitation
-    if(calculate_angle*180/PI>max_angle_)
-        Target_angle_=max_angle_;
-    else if(calculate_angle*180/PI<min_angle_)
-        Target_angle_=min_angle_;
-    else
-        Target_angle_=calculate_angle*180/PI;
-    return Target_angle_;
-}
 
 /**
  * @brief 函数简要说明-更新参考路径
@@ -102,7 +39,7 @@ float Lateral_Control::GetTargetSteer(vector<decision::SinglePoint> msg,
  *     -<em>false</em> fail
  *     -<em>true</em> succeed
  */
-bool Lateral_Control::UpdatePath(vector<decision::SinglePoint> msg)
+bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
 {
     vector<decision::SinglePoint> path_temp;
     RefState_.clear();
@@ -139,10 +76,6 @@ bool Lateral_Control::UpdatePath(vector<decision::SinglePoint> msg)
             last_pt=msg[i];
             if(RND_gear_==0)
             {
-//                msg[i].x*=-1;
-//                msg[i].y*=-1;
-//                path_temp.insert(path_temp.begin(),msg[i]);
-
                 pt_temp.x=msg[0].x-path_dx*i*0.2;
                 pt_temp.y=msg[0].y-path_dy*i*0.2;
                 path_temp.insert(path_temp.begin(),pt_temp);
@@ -273,13 +206,8 @@ bool Lateral_Control::UpdatePath(vector<decision::SinglePoint> msg)
              ddx = RefState_[i+1].x + RefState_[i-1].x - 2*RefState_[i].x;
              ddy = RefState_[i+1].y + RefState_[i-1].y - 2*RefState_[i].y;
         }
-//        cout << "dx " << dx<<"  dy "<<dy<< std::endl;
-//        cout << "atan " << atan2(dy,dx)<< std::endl;
 
-        //refer_path[i][2] = atan2(dy,dx);//yaw
-        //计算曲率:设曲线r(t) =(x(t),y(t)),则曲率k=(x'y" - x"y')/((x')^2 + (y')^2)^(3/2).
-        //参考：https://blog.csdn.net/weixin_46627433/article/details/123403726
-        //refer_path[i][3]= (ddy * dx - ddx * dy) / pow((dx * dx + dy * dy), 3 / 2) ;// 曲率k计算
+        //curvature: r(t) =(x(t),y(t)),则曲率k=(x'y" - x"y')/((x')^2 + (y')^2)^(3/2).
             RefState_[i].K= (ddx * dy - ddy * dx) / pow((dy * dy + dx * dx), 3 / 2) ;// 曲率k计算
     }
     return true;

@@ -1,17 +1,7 @@
-#include "LateralControl.h"
 #include "Vehicle.h"
 #include <getopt.h>
 #include <fstream>
 #include <sstream>
-
-struct ControlInfo {
-    std::string controlMethod;
-    int pathLength;
-    std::string modelName;
-    State init_state;
-    std::vector<aiforce::decision::SinglePoint> pathPoints;
-};
-
 
 int main(int argc, char *argv[]) {
     const char* help;  // = "Usage: Vechicle-Simulator [options] -i file\n"
@@ -69,6 +59,7 @@ int main(int argc, char *argv[]) {
     }
 
     ControlInfo controlInfo;
+    double time_length;
 
     std::string line;
     int lineCount = 0;
@@ -83,7 +74,7 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case 1: // 输入路径长度
-                if (line.find("Path length: ") == 0) {
+                if (line.find("Seen length: ") == 0) {
                     controlInfo.pathLength = std::stoi(line.substr(13));
                 }
                 break;
@@ -96,6 +87,24 @@ int main(int argc, char *argv[]) {
                 if (!line.empty()) {
                     std::istringstream ss(line);
                     ss >> controlInfo.init_state.x >> controlInfo.init_state.y >> controlInfo.init_state.psi;
+                }
+                break;
+            case 4: // vehicle init pose
+                if (!line.empty()) {
+                    std::istringstream ss(line);
+                    ss >> controlInfo.speed;
+                }
+                break;
+            case 5: // sampling time
+                if (!line.empty()) {
+                    std::istringstream ss(line);
+                    ss >> controlInfo.dt;
+                }
+                break;
+            case 6: // time length
+                if (!line.empty()) {
+                    std::istringstream ss(line);
+                    ss >> time_length;
                 }
                 break;
             default: // 路径点坐标
@@ -116,12 +125,25 @@ int main(int argc, char *argv[]) {
     std::cout << "Path Length: " << controlInfo.pathLength << std::endl;
     std::cout << "Model Name: " << controlInfo.modelName << std::endl;
     std::cout << "Initial Pose: " << controlInfo.init_state.x <<", " << controlInfo.init_state.y <<", "<< controlInfo.init_state.psi << std::endl;
-
+    std::cout << "Sampling time " << controlInfo.dt <<", Time legnth: " << time_length << std::endl;
     std::cout << "Path Points:" << std::endl;
     for (const auto& point : controlInfo.pathPoints) {
         std::cout << "(" << point.x << ", " << point.y << ")" << std::endl;
     }
     inputFile.close();
+
+    //start simulator
+    Vehicle tractor(controlInfo.init_state.x,
+                    controlInfo.init_state.y,
+                    controlInfo.init_state.psi,
+                    controlInfo.speed,
+                    6,
+                    controlInfo.dt);
+    
+    tractor.Simulator(time_length, controlInfo);
+    for (const auto& pointx : tractor.xout) {
+        std::cout << pointx << std::endl;
+    }
 
     // simulate
 }

@@ -30,6 +30,16 @@ struct State
     double x,y,psi,K;
 };
 
+struct ControlInfo {
+    std::string controlMethod;
+    int pathLength;
+    std::string modelName;
+    State init_state;
+    int speed;
+    double dt;
+    std::vector<aiforce::decision::SinglePoint> pathPoints;
+};
+
 double Pt_dist(WayPoint pt1,WayPoint pt2);
 double Pt_dist(State pt1,State pt2);
 double Pt_dist(aiforce::decision::SinglePoint pt1,aiforce::decision::SinglePoint pt2);
@@ -38,7 +48,7 @@ double calCurvature(WayPoint pt_prime, WayPoint pt, WayPoint pt_later);
 bool IsEqual(double a,double b);   //判断两值是否相等
 double getDistancePointToLine(WayPoint A, WayPoint B, WayPoint P); //点P到直线AB的距离
 double getDistancePointToLine(State A, State B, State P); //点P到直线AB的距离
-
+int calTargetIndex(State robot_state, std::vector<State> refer_path);
 
 
 class Filter

@@ -67,8 +67,24 @@ double normalizeAngle(double angle) {
     return angle;
 }
 
-Filter::Filter(){
 
+/**
+ * 搜索目标邻近路点
+ * @param robot_state 当前机器人位置
+ * @param refer_path 参考轨迹（数组）
+ * @return
+ */
+int calTargetIndex(State robot_state, vector<State> refer_path) {
+    vector<double>dists;
+    for (State xy:refer_path) {
+        double dist = sqrt(pow(xy.x-robot_state.x,2)+pow(xy.y-robot_state.y,2));
+        dists.push_back(dist);
+    }
+    return min_element(dists.begin(),dists.end())-dists.begin(); //返回vector最小元素的下标
+}
+
+
+Filter::Filter(){
 }
 
 void Filter::setting_num(double CurrentSpeed)

@@ -4,7 +4,12 @@ CONFIG += c++11 console
 CONFIG -= app_bundle
 CONFIG -= QT
 
-TARGET = sim
+CONFIG+=debug_and_release
+CONFIG(debug, debug|release){
+    TARGET = sim
+} else {
+    TARGET = sim
+}
 DESTDIR = ./bin
 OBJECTS_DIR     = ./build
 # The following define makes your compiler emit warnings if you use

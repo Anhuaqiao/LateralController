@@ -9,12 +9,13 @@
 #include <algorithm>
 #include<eigen3/Eigen/Dense>
 #include "../Common.h"
+#include "Controller.h"
 
 using namespace std;
 
 
 
-class Stanley {
+class Stanley :public aiforce::control::Controller{
 private:
     double k_psi=1;  //横向偏差的系数
     double k_lateral=1;  //航向偏差系数
@@ -27,15 +28,17 @@ private:
     double last_angle=0;
 
 public:
-    void set_parameter(double k_psi,double k_lateral,double k_soft,double k_yaw_rate,double kd);
-public:
     double sum_ey=0;
     double yaw_rate=0;
     double cur_speed=0;
+
+private:
+
+public:
+    void set_parameter(double k_psi,double k_lateral,double k_soft,double k_yaw_rate,double kd);
     Stanley();
     ~Stanley() = default;
-    int calTargetIndex(State robot_state, vector<State> refer_path);
-    double stanleyControl(State cur_state,double cur_speed,double wheel_base, vector<State> refer_path);
+    double steer(State cur_state,double cur_speed,double wheel_base, vector<State> refer_path) override;
     };
 
 
