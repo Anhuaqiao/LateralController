@@ -2,7 +2,7 @@
 
 Xiaohan has created a controller class for both simulation and visualization(GnuPlot) for the lateral controller developing. The code is initially build based on the previous work by Liu Kai.
 
-## To-be-doen
+## To-be-done
 
 An in-depth paragraph about your project and overview of use.
 

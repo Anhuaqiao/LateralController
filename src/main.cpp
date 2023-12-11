@@ -170,19 +170,7 @@ int main(int argc, char *argv[]) {
         std::cerr << "Unable to open the file." << std::endl;
     }
 
-  // 生成一些示例数据并保存到文件中
-    std::ofstream dataFile("data.txt");
-    if (!dataFile.is_open()) {
-        std::cerr << "Error: Unable to create data file." << std::endl;
-        return 1;
-    }
-    // 写入示例数据到文件中
-    dataFile << "1 2\n";
-    dataFile << "2 3\n";
-    dataFile << "3 5\n";
-    dataFile << "4 7\n";
-    dataFile << "5 11\n";
-    dataFile.close();
+
 
     // 创建GNUplot指令
     std::ostringstream gnuplotCmd;
