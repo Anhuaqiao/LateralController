@@ -6,7 +6,7 @@ namespace control{
 
 Controller::Controller():
       PreTurn_(true),
-      refpath_limitnum(30),
+      refpath_limitnum(5),
       max_angle_(30),
       min_angle_(-30),
       gap_(0.2){}
@@ -55,7 +55,7 @@ bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
     int cur_mode1=msg[0].mode1;
     int cur_mode2=msg[0].mode2;
     int count_num=0;
-    int target_num=100;
+    int target_num=5;
     if(msg.size()>1)
     {
         path_dx=(msg[1].x-msg[0].x)/Pt_dist(msg[1],msg[0]);

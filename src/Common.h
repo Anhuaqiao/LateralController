@@ -23,6 +23,9 @@ struct WayPoint
     WayPoint(double x_,double y_){x=x_;y=y_;}
 };
 
+
+
+
 struct State
 {
     State(double x_,double y_,double psi_){x=x_;y=y_;psi=psi_;} // 横坐标 纵坐标 航向 曲率
@@ -35,7 +38,7 @@ struct ControlInfo {
     int pathLength;
     std::string modelName;
     State init_state;
-    int speed;
+    double speed;
     double dt;
     std::vector<aiforce::decision::SinglePoint> pathPoints;
 };
@@ -49,6 +52,17 @@ bool IsEqual(double a,double b);   //判断两值是否相等
 double getDistancePointToLine(WayPoint A, WayPoint B, WayPoint P); //点P到直线AB的距离
 double getDistancePointToLine(State A, State B, State P); //点P到直线AB的距离
 int calTargetIndex(State robot_state, std::vector<State> refer_path);
+template <typename T>
+std::vector<T> slicing(typename std::vector<T>::const_iterator X,
+                  typename std::vector<T>::const_iterator Y)
+{
+    // Copy the element
+    std::vector<T> vector(X, Y);
+ 
+    // Return the results
+    return vector;
+}
+std::vector<State> SingleP2State(std::vector<aiforce::decision::SinglePoint> & singlep);
 
 
 class Filter

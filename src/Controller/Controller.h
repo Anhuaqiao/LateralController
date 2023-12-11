@@ -32,9 +32,9 @@ public:
     Filter avgfilt;
     vector<State> RefState_;
     bool PreTurn_=true; 
-    int refpath_limitnum=30; 
-    double max_angle_=30;
-    double min_angle_=-30;
+    int refpath_limitnum; 
+    double max_angle_;
+    double min_angle_;
     float gap_=0.2;
     int RND_gear_;
     int Driving_mode_;

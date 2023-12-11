@@ -2,6 +2,8 @@
 #include <getopt.h>
 #include <fstream>
 #include <sstream>
+#include <string>
+#include <cstdlib>
 
 int main(int argc, char *argv[]) {
     const char* help;  // = "Usage: Vechicle-Simulator [options] -i file\n"
@@ -13,7 +15,8 @@ int main(int argc, char *argv[]) {
                        //"-o, --output        output file\n";
     bool true_input = 0;    // -t
     std::ifstream inputFile;     // -i, --input
-    FILE* output = stdout;  // -o, --output
+    std::ofstream outputFile; // Open a file for writing
+    string intputfilename, outputfilename;
     // parse arguments
     const char* short_options = "hti:o:";
     const struct option long_options[] = {
@@ -34,6 +37,7 @@ int main(int argc, char *argv[]) {
             case 'i':
                 if (optarg != NULL) {
                     inputFile.open(optarg);
+                    intputfilename = optarg;
                     if (!inputFile.is_open()) {
                     std::cerr << "Unable to open file." << std::endl;
                     std::cerr<< "Name is " << optarg <<endl;
@@ -42,10 +46,14 @@ int main(int argc, char *argv[]) {
                 }
                 break;
             case 'o':
-                output = fopen(optarg, "w");
-                if (output == NULL) {
-                    fprintf(stderr, "output file \"%s\" could not be created.\n", optarg);
+                if (optarg != NULL) {
+                    outputFile.open(optarg);
+                    outputfilename = optarg;
+                    if (!outputFile.is_open()) {
+                    std::cerr << "Unable to open output file." << std::endl;
+                    std::cerr<< "Name is " << optarg <<endl;
                     return 1;
+                    }
                 }
                 break;
             default:
@@ -127,6 +135,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Initial Pose: " << controlInfo.init_state.x <<", " << controlInfo.init_state.y <<", "<< controlInfo.init_state.psi << std::endl;
     std::cout << "Sampling time " << controlInfo.dt <<", Time legnth: " << time_length << std::endl;
     std::cout << "Path Points:" << std::endl;
+
     for (const auto& point : controlInfo.pathPoints) {
         std::cout << "(" << point.x << ", " << point.y << ")" << std::endl;
     }
@@ -137,13 +146,59 @@ int main(int argc, char *argv[]) {
                     controlInfo.init_state.y,
                     controlInfo.init_state.psi,
                     controlInfo.speed,
-                    6,
+                    2,
                     controlInfo.dt);
     
     tractor.Simulator(time_length, controlInfo);
-    for (const auto& pointx : tractor.xout) {
-        std::cout << pointx << std::endl;
+
+
+    // Check if the file is open
+    if (outputFile.is_open()) {
+        std::cout << tractor.xout.size() << std::endl;
+
+        // Write vector elements into the file
+        for (auto i=0;i<tractor.xout.size();i++) {
+            std::cout << "(" << tractor.xout[i] << "," << tractor.yout[i] << ")"<< std::endl;
+            outputFile << tractor.xout[i] << " " << tractor.yout[i]<<"\n";
+        }
+
+        // Close the file
+        outputFile.close();
+        std::cout << "Vector elements written to output.txt successfully." << std::endl;
+    } else {
+        // Display an error message if the file couldn't be opened
+        std::cerr << "Unable to open the file." << std::endl;
     }
 
-    // simulate
+  // 生成一些示例数据并保存到文件中
+    std::ofstream dataFile("data.txt");
+    if (!dataFile.is_open()) {
+        std::cerr << "Error: Unable to create data file." << std::endl;
+        return 1;
+    }
+    // 写入示例数据到文件中
+    dataFile << "1 2\n";
+    dataFile << "2 3\n";
+    dataFile << "3 5\n";
+    dataFile << "4 7\n";
+    dataFile << "5 11\n";
+    dataFile.close();
+
+    // 创建GNUplot指令
+    std::ostringstream gnuplotCmd;
+    gnuplotCmd << "set terminal epscairo enhanced color font 'Arial,12' size 5in,3in\n"; // 设置输出为EPS，指定输出文件尺寸和字体
+    gnuplotCmd << "set output 'output.eps'\n";
+    gnuplotCmd << "plot '"<<outputfilename<<"' with linespoints title '"<<"vehicle path"<<"', "
+               << "'"<<intputfilename<<"'every ::7 with linespoints title '"<<"refer path"<<"'\n";// 使用文件中的数据绘制图表
+
+    // 调用GNUplot绘制图表
+    FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
+    if (gnuplotPipe) {
+        fprintf(gnuplotPipe, "%s", gnuplotCmd.str().c_str()); // 发送GNUplot指令
+        fprintf(gnuplotPipe, "exit\n"); // 退出GNUplot
+        pclose(gnuplotPipe);
+    } else {
+        std::cerr << "Error: Could not open GNUplot." << std::endl;
+    }
+    return 0;
 }

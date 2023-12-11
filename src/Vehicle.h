@@ -9,6 +9,7 @@
 #include "Common.h"
 #include <unordered_map>
 #include "Controller/stanley.h"
+#define PI 3.1415926
 
 using namespace std;
 
@@ -25,6 +26,7 @@ public:
     double time_length; // simulating time
     double dt;          // sampling time
     State vehicle_state;
+    State ego_state;
     vector<double> xout;
     vector<double> yout;
     vector<double> psiout;
@@ -33,7 +35,7 @@ public:
     Vehicle(double x, double y, double psi, double v, double l, double dt);
     void Update(int acc, int delta);
     vector<aiforce::decision::SinglePoint> getPath(vector<aiforce::decision::SinglePoint>::const_iterator path_begin, vector<aiforce::decision::SinglePoint>::const_iterator path_end);
-    vector<State> Simulator(double time_length, const ControlInfo & controlInfo);
+    void Simulator(double time_length, const ControlInfo & controlInfo);
     ~Vehicle();
 };
 
@@ -44,11 +46,11 @@ public:
  * @param y             the x-coordinate of the vehicle in the world frame
  * @param yaw           the yaw angle w.r.t. the x coordinate of the world frame
  * @param v             the longitudal velocity of the vehicle in the world frame
- * @param l             the wheelbase of the vehicle
+ * @param L             the wheelbase of the vehicle
  * @param dt            the sampling time
  * @return              none
  */
-Vehicle::Vehicle(double x, double y, double psi, double v, double l, double dt)
+Vehicle::Vehicle(double x, double y, double psi, double v, double L, double dt)
 {   
     this->x = x;
     this->y = y;
@@ -59,6 +61,9 @@ Vehicle::Vehicle(double x, double y, double psi, double v, double l, double dt)
     this->vehicle_state.x = this->x;
     this->vehicle_state.y = this->y;
     this->vehicle_state.psi = this->psi;
+    ego_state.x = L/2;
+    ego_state.y = 0;
+    ego_state.psi = 0;
 }
 
 Vehicle::~Vehicle()
@@ -83,10 +88,10 @@ void Vehicle::Update(int acc, int delta){
 
 vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision::SinglePoint>::const_iterator path_begin, vector<aiforce::decision::SinglePoint>::const_iterator path_end){ //https://eclass.hna.gr/modules/document/file.php/TOM6113/active_and_passive_transformations.pdf
     vector<aiforce::decision::SinglePoint> path2;
-    aiforce::decision::SinglePoint point2;
+    aiforce::decision::SinglePoint point2(0,0,0,0);
     for (auto point1 = path_begin; point1 != path_end; ++point1){ //https://blog.csdn.net/Asimov_Liu/article/details/119931291
-        int tmp_x = (*point1).x-this->x;
-        int tmp_y = (*point1).y-this->y; 
+        double tmp_x = (*point1).x-this->x;
+        double tmp_y = (*point1).y-this->y; 
         point2.x = tmp_x*cos(this->psi) + tmp_y*sin(this->psi);
         point2.y = -tmp_x*sin(this->psi) + tmp_y*cos(this->psi);
         path2.emplace_back(point2);
@@ -96,7 +101,7 @@ vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision
 
 
 
- vector<State> Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
+void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
 
     double time_now=0;
     aiforce::control::Controller * controller = new Stanley();
@@ -105,21 +110,23 @@ vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision
 
     vector<aiforce::decision::SinglePoint>::const_iterator cur_path_begin=controlInfo.pathPoints.begin(), cur_path_end;
     cur_path_end = std::next(controlInfo.pathPoints.begin(), controlInfo.pathLength);
-    vector<aiforce::decision::SinglePoint> current_path_in_vehicle;
+    vector<aiforce::decision::SinglePoint> current_path_in_vehicle,current_path_in_world;
+    vector<State> current_path_in_world_state;
+    current_path_in_world = slicing<aiforce::decision::SinglePoint>(cur_path_begin,cur_path_end);
     current_path_in_vehicle = getPath(cur_path_begin,cur_path_end);
 
     controller->UpdatePath(current_path_in_vehicle);
     vector<State> ego_refer_path = controller->RefState_;
 
     int path_index_now, path_total_index=controlInfo.pathPoints.size();
-    path_index_now = calTargetIndex(vehicle_state, ego_refer_path);
+    path_index_now = calTargetIndex(ego_state, ego_refer_path);
 
     double steer_angle;
 
 
-    while (time_now<=time_length && path_index_now<=path_total_index)
+    while (time_now<=time_length && path_index_now<=path_total_index && (this->x < 22 && this->y < 102))
     {   
-        State ego_cur_state(L/2,0,PI/2);
+        State ego_cur_state(L/2,0,0);
         steer_angle = controller->steer(ego_cur_state, cur_speed, L, ego_refer_path);
         Update(0, steer_angle);
         xout.emplace_back(this->x);
@@ -127,14 +134,17 @@ vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision
         psiout.emplace_back(this->psi);
         steerout.emplace_back(steer_angle);
 
-        path_index_now = calTargetIndex(vehicle_state, ego_refer_path);
+        current_path_in_world_state = SingleP2State(current_path_in_world);
+        path_index_now = calTargetIndex(vehicle_state, current_path_in_world_state);
 
-        cur_path_begin = std::next(controlInfo.pathPoints.begin(), path_index_now);
-        cur_path_end = std::next(controlInfo.pathPoints.begin(), path_index_now+controlInfo.pathLength);
+        cur_path_begin = std::next(cur_path_begin, path_index_now);
+        cur_path_end = std::next(cur_path_begin, controlInfo.pathLength);
 
-        current_path_in_vehicle = getPath(cur_path_begin, cur_path_begin);
+        current_path_in_world = slicing<aiforce::decision::SinglePoint>(cur_path_begin,cur_path_end);
+        current_path_in_vehicle = getPath(cur_path_begin, cur_path_end); 
         controller->UpdatePath(current_path_in_vehicle);
         ego_refer_path = controller->RefState_;
+        time_now += 1;
     }
     
  }
