@@ -11,6 +11,11 @@ Controller::Controller():
       min_angle_(-30),
       gap_(0.2){}
 
+double Controller::steer_limit(double steer_angle){
+    steer_angle = steer_angle > PI/6 ? PI/6:steer_angle;
+    steer_angle = steer_angle < (-PI/6) ? (-PI/6):steer_angle;
+    return steer_angle;
+}
 
 void Controller::Controller_preprocessor(vector<decision::SinglePoint> msg,
                          int Pts_Num,

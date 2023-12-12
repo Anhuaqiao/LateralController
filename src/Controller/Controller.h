@@ -14,6 +14,7 @@
 #include "../info_transform_types.h"
 #include "../Common.h"
 #include <unordered_map>
+#define PI 3.1415926
 
 using namespace std;
 namespace aiforce {
@@ -55,6 +56,7 @@ protected:
                          float WheelBase,
                          int driving_mode_, //0：手动驾驶， 1:自动驾驶，2:导航模式
                          int rnd_gear_);
+    double steer_limit(double steer_angle);
 
 
 };

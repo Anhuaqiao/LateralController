@@ -90,11 +90,18 @@ vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision
     vector<aiforce::decision::SinglePoint> path2;
     aiforce::decision::SinglePoint point2(0,0,0,0);
     for (auto point1 = path_begin; point1 != path_end; ++point1){ //https://blog.csdn.net/Asimov_Liu/article/details/119931291
-        double tmp_x = (*point1).x-this->x;
-        double tmp_y = (*point1).y-this->y; 
-        point2.x = tmp_x*cos(this->psi) + tmp_y*sin(this->psi);
-        point2.y = -tmp_x*sin(this->psi) + tmp_y*cos(this->psi);
-        path2.emplace_back(point2);
+        if(((*point1).x==0)&&((*point1).y==0)){
+            point2.x = 0;
+            point2.y = 0;
+            path2.emplace_back(point2);
+        }
+        else{
+            double tmp_x = (*point1).x-this->x;
+            double tmp_y = (*point1).y-this->y; 
+            point2.x = tmp_x*cos(this->psi) + tmp_y*sin(this->psi);
+            point2.y = -tmp_x*sin(this->psi) + tmp_y*cos(this->psi);
+            path2.emplace_back(point2);
+        }
     }
     return path2;
 }
@@ -124,7 +131,7 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
     double steer_angle;
 
 
-    while (time_now<=time_length && path_index_now<=path_total_index && (this->x < 22 && this->y < 102) && this->x>0 && this->y>0)
+    while (time_now<=time_length)
     {   
         State ego_cur_state(L/2,0,0);
         steer_angle = controller->steer(ego_cur_state, cur_speed, L, ego_refer_path);

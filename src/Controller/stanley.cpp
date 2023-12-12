@@ -39,5 +39,5 @@ double Stanley::steer(State cur_state,double cur_speed,double wheel_base,vector<
     double dist_theta = atan2(k_lateral*cross_track_error, cur_speed);                    //横向偏差
     double delta = psi_theta+dist_theta;
 
-    return delta;
+    return steer_limit(delta);
 }
