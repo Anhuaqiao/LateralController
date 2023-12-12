@@ -43,15 +43,23 @@ struct ControlInfo {
     std::vector<aiforce::decision::SinglePoint> pathPoints;
 };
 
-double Pt_dist(WayPoint pt1,WayPoint pt2);
-double Pt_dist(State pt1,State pt2);
-double Pt_dist(aiforce::decision::SinglePoint pt1,aiforce::decision::SinglePoint pt2);
 double normalizeAngle(double angle);
 double calCurvature(WayPoint pt_prime, WayPoint pt, WayPoint pt_later);
 bool IsEqual(double a,double b);   //判断两值是否相等
-double getDistancePointToLine(WayPoint A, WayPoint B, WayPoint P); //点P到直线AB的距离
-double getDistancePointToLine(State A, State B, State P); //点P到直线AB的距离
 int calTargetIndex(State robot_state, std::vector<State> refer_path);
+
+template<typename T>
+double Pt_dist(const T& pt1, const T& pt2) {
+    return sqrt(pow((pt1.x - pt2.x), 2) + pow((pt1.y - pt2.y), 2));
+}
+
+template<typename T>
+double getDistancePointToLine(const T& A, const T& B, const T& P) {
+    double area = abs((B.x - A.x) * (P.y - A.y) - (P.x - A.x) * (B.y - A.y));
+    double base = Pt_dist(A, B);
+    return area / base;
+}
+
 template <typename T>
 std::vector<T> slicing(typename std::vector<T>::const_iterator X,
                   typename std::vector<T>::const_iterator Y)

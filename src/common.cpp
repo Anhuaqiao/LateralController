@@ -8,29 +8,6 @@
 #include "Common.h"
 
 using namespace std;
-double Pt_dist(WayPoint pt1,WayPoint pt2)
-{
-    return sqrt(pow((pt1.x-pt2.x),2)+pow((pt1.y-pt2.y),2));
-}
-double Pt_dist(State pt1,State pt2)
-{
-    return sqrt(pow((pt1.x-pt2.x),2)+pow((pt1.y-pt2.y),2));
-}
-double Pt_dist(aiforce::decision::SinglePoint pt1,aiforce::decision::SinglePoint pt2)
-{
-    return sqrt(pow((pt1.x-pt2.x),2)+pow((pt1.y-pt2.y),2));
-}
-double getDistancePointToLine(WayPoint A, WayPoint B, WayPoint P) {
-    double area = abs((B.x - A.x) * (P.y - A.y) - (P.x - A.x) * (B.y - A.y));
-    double base = Pt_dist(A, B);
-    return area / base;
-}
-
-double getDistancePointToLine(State A, State B, State P) {
-    double area = abs((B.x - A.x) * (P.y - A.y) - (P.x - A.x) * (B.y - A.y));
-    double base = Pt_dist(A, B);
-    return area / base;
-}
 
 bool IsEqual(double a,double b)
 {
