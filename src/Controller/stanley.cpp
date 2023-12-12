@@ -37,12 +37,14 @@ double Stanley::steer(State cur_state,double cur_speed,double wheel_base,vector<
 
     double ref_psi_rate = calRefPsiRate(refer_path,current_target_index,cur_speed);    
 
+    double psi_static_set_point = m*cur_speed*ref_psi_rate/Cy/(1+(3*wheel_base)/5/(2*wheel_base)/5);
+    
     double psi_theta = normalizeAngle(current_ref_state.psi - cur_state.psi);             //航向偏差
     double dist_theta = atan2(k_lateral*cross_track_error, cur_speed);                    //横向偏差
     double psi_rate_theta = k_yaw_rate*(cur_state.psi_rate-ref_psi_rate); 
 
 
-    double delta = psi_theta+dist_theta+psi_rate_theta;
+    double delta = (psi_theta-psi_static_set_point)+dist_theta+psi_rate_theta;
 
     return steer_limit(delta);
 }
