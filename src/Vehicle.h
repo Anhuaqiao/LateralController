@@ -137,8 +137,8 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
         current_path_in_world_state = SingleP2State(current_path_in_world);
         path_index_now = calTargetIndex(vehicle_state, current_path_in_world_state);
 
-        //cur_path_begin = std::next(cur_path_begin, path_index_now);
-        //cur_path_end = std::next(cur_path_begin, controlInfo.pathLength);
+        cur_path_begin = std::next(cur_path_begin, path_index_now);
+        cur_path_end = std::next(cur_path_begin, controlInfo.pathLength);
 
         current_path_in_world = slicing<aiforce::decision::SinglePoint>(cur_path_begin,cur_path_end);
         current_path_in_vehicle = getPath(cur_path_begin, cur_path_end); 
