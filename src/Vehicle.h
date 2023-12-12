@@ -25,6 +25,7 @@ public:
     double L;           // wheelbase
     double time_length; // simulating time
     double dt;          // sampling time
+    double psi_rate=0;
     State vehicle_state;
     State ego_state;
     vector<double> xout;
@@ -76,6 +77,7 @@ void Vehicle::Update(double acc, double delta){
     psi += v / L * tan(delta)*dt;
     psi = normalizeAngle(psi);
     v += acc*dt;
+    psi_rate = v / L * tan(delta);
     this->vehicle_state.x = this->x;
     this->vehicle_state.y = this->y;
     this->vehicle_state.psi = this->psi;
@@ -133,7 +135,7 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
 
     while (time_now<=time_length)
     {   
-        State ego_cur_state(L/2,0,0);
+        State ego_cur_state(L/2,0,0,this->psi_rate);
         steer_angle = controller->steer(ego_cur_state, cur_speed, L, ego_refer_path);
         Update(0, steer_angle);
         xout.emplace_back(this->x);

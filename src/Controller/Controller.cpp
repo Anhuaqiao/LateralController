@@ -30,10 +30,13 @@ void Controller::Controller_preprocessor(vector<decision::SinglePoint> msg,
     avgfilt.setting_num(currentspeed);
     bool path_flag=UpdatePath(msg);
 
-    State cur_state(0,0,0);   //(x,y,posture) x沿车身方向 y垂直车身方向 xy满足右手定则
+    State cur_state(0,0,0,0);   //(x,y,posture) x沿车身方向 y垂直车身方向 xy满足右手定则
     cur_state.x=WheelBase;
                          }
 
+double Controller::calRefPsiRate(std::vector<State>& refer_path, int& target_index, double cur_speed){
+    return target_index==(refer_path.size()-1)? (refer_path[target_index].psi-refer_path[target_index-1].psi)/Pt_dist(refer_path[target_index],refer_path[target_index-1])/cur_speed:(refer_path[target_index+1].psi-refer_path[target_index].psi)/Pt_dist(refer_path[target_index+1],refer_path[target_index])/cur_speed;
+}
 
 /**
  * @brief 函数简要说明-更新参考路径

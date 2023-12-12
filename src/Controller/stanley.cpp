@@ -7,7 +7,7 @@ Stanley::Stanley():aiforce::control::Controller(){
       this->k_psi = 1.0;
       this->k_lateral = 0.5;
       this->k_soft = 0.9;
-      this->k_yaw_rate = 0.5;
+      this->k_yaw_rate = 1;
       this->kd = 0;
 }
 
@@ -32,12 +32,17 @@ double Stanley::steer(State cur_state,double cur_speed,double wheel_base,vector<
     State  current_ref_state = refer_path[current_target_index];  //参考路径上 离车实际位置最近的参考点
     current_ref_state.x = -current_ref_state.x;
     current_ref_state.y = -current_ref_state.y;
-    State negative_y(0,-1,0);
+    State negative_y(0,-1,0,0);
     double cross_track_error = dotProduct(current_ref_state,negative_y);
+
+    double ref_psi_rate = calRefPsiRate(refer_path,current_target_index,cur_speed);    
 
     double psi_theta = normalizeAngle(current_ref_state.psi - cur_state.psi);             //航向偏差
     double dist_theta = atan2(k_lateral*cross_track_error, cur_speed);                    //横向偏差
-    double delta = psi_theta+dist_theta;
+    double psi_rate_theta = k_yaw_rate*(cur_state.psi_rate-ref_psi_rate); 
+
+
+    double delta = psi_theta+dist_theta+psi_rate_theta;
 
     return steer_limit(delta);
 }

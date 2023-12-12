@@ -28,9 +28,9 @@ struct WayPoint
 
 struct State
 {
-    State(double x_,double y_,double psi_){x=x_;y=y_;psi=psi_;} // 横坐标 纵坐标 航向 曲率
+    State(double x_,double y_,double psi_,double psi_rate_){x=x_;y=y_;psi=psi_;psi_rate=psi_rate_;} // 横坐标 纵坐标 航向 曲率
     State(){}
-    double x,y,psi,K;
+    double x,y,psi,psi_rate,K;
 };
 
 struct ControlInfo {

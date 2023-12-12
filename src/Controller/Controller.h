@@ -57,6 +57,7 @@ protected:
                          int driving_mode_, //0：手动驾驶， 1:自动驾驶，2:导航模式
                          int rnd_gear_);
     double steer_limit(double steer_angle);
+    double calRefPsiRate(std::vector<State>& refer_path, int& target_index, double cur_speed);
 
 
 };
