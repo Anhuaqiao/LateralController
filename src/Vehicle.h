@@ -33,7 +33,7 @@ public:
     vector<double> steerout;
 public:
     Vehicle(double x, double y, double psi, double v, double l, double dt);
-    void Update(int acc, int delta);
+    void Update(double acc, double delta);
     vector<aiforce::decision::SinglePoint> getPath(vector<aiforce::decision::SinglePoint>::const_iterator path_begin, vector<aiforce::decision::SinglePoint>::const_iterator path_end);
     void Simulator(double time_length, const ControlInfo & controlInfo);
     ~Vehicle();
@@ -70,7 +70,7 @@ Vehicle::~Vehicle()
 {
 }
 
-void Vehicle::Update(int acc, int delta){
+void Vehicle::Update(double acc, double delta){
     x += v* cos(psi)*dt;
     y += v*sin(psi)*dt;
     psi += v / L * tan(delta)*dt;
@@ -124,7 +124,7 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
     double steer_angle;
 
 
-    while (time_now<=time_length && path_index_now<=path_total_index && (this->x < 22 && this->y < 102))
+    while (time_now<=time_length && path_index_now<=path_total_index && (this->x < 22 && this->y < 102) && this->x>0 && this->y>0)
     {   
         State ego_cur_state(L/2,0,0);
         steer_angle = controller->steer(ego_cur_state, cur_speed, L, ego_refer_path);
@@ -137,8 +137,8 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
         current_path_in_world_state = SingleP2State(current_path_in_world);
         path_index_now = calTargetIndex(vehicle_state, current_path_in_world_state);
 
-        cur_path_begin = std::next(cur_path_begin, path_index_now);
-        cur_path_end = std::next(cur_path_begin, controlInfo.pathLength);
+        //cur_path_begin = std::next(cur_path_begin, path_index_now);
+        //cur_path_end = std::next(cur_path_begin, controlInfo.pathLength);
 
         current_path_in_world = slicing<aiforce::decision::SinglePoint>(cur_path_begin,cur_path_end);
         current_path_in_vehicle = getPath(cur_path_begin, cur_path_end); 

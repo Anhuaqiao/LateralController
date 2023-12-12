@@ -49,6 +49,11 @@ bool IsEqual(double a,double b);   //判断两值是否相等
 int calTargetIndex(State robot_state, std::vector<State> refer_path);
 
 template<typename T>
+double dotProduct(const T& p1, const T& p2) {
+    return p1.x * p2.x + p1.y * p2.y;
+}
+
+template<typename T>
 double Pt_dist(const T& pt1, const T& pt2) {
     return sqrt(pow((pt1.x - pt2.x), 2) + pow((pt1.y - pt2.y), 2));
 }

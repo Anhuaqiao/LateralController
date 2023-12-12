@@ -25,7 +25,7 @@ void Controller::Controller_preprocessor(vector<decision::SinglePoint> msg,
     avgfilt.setting_num(currentspeed);
     bool path_flag=UpdatePath(msg);
 
-    State cur_state(0,0,PI/2);   //(x,y,posture) x沿车身方向 y垂直车身方向 xy满足右手定则
+    State cur_state(0,0,0);   //(x,y,posture) x沿车身方向 y垂直车身方向 xy满足右手定则
     cur_state.x=WheelBase;
                          }
 
@@ -153,9 +153,9 @@ bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
             pt_state.x=path_temp[i].x;
             pt_state.y=path_temp[i].y;
             if(i<path_temp.size()-1)
-                pt_state.psi=atan2((path_temp[i+1].x-path_temp[i].x),(path_temp[i+1].y-path_temp[i].y));
+                pt_state.psi=atan2((path_temp[i+1].y-path_temp[i].y),(path_temp[i+1].x-path_temp[i].x));
             else
-                pt_state.psi=atan2((path_temp[i].x-path_temp[i-1].x),(path_temp[i].y-path_temp[i].y));
+                pt_state.psi=atan2((path_temp[i].y-path_temp[i].y),(path_temp[i].x-path_temp[i-1].x));
             RefState_.push_back(pt_state);
         }
         dist=Pt_dist(path_temp[path_temp.size()-1],path_temp[path_temp.size()-2]);
@@ -165,7 +165,7 @@ bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
         {
             pt_state.x=path_temp[path_temp.size()-1].x+dx*i;
             pt_state.y=path_temp[path_temp.size()-1].y+dy*i;
-            pt_state.psi=atan2(dx,dy);
+            pt_state.psi=atan2(dy,dx);
             RefState_.push_back(pt_state);
         }
     }
@@ -176,9 +176,9 @@ bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
             pt_state.x=path_temp[i].x;
             pt_state.y=path_temp[i].y;
             if(i<path_temp.size()-1)
-                pt_state.psi=atan2((path_temp[i+1].x-path_temp[i].x),(path_temp[i+1].y-path_temp[i].y));
+                pt_state.psi=atan2((path_temp[i+1].y-path_temp[i].y),(path_temp[i+1].x-path_temp[i].x));
             else
-                pt_state.psi=atan2((path_temp[i].x-path_temp[i-1].x),(path_temp[i].y-path_temp[i].y));
+                pt_state.psi=atan2((path_temp[i].y-path_temp[i].y),(path_temp[i].x-path_temp[i-1].x));
             RefState_.push_back(pt_state);
         }
     }

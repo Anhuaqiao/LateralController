@@ -97,7 +97,7 @@ int main(int argc, char *argv[]) {
                     ss >> controlInfo.init_state.x >> controlInfo.init_state.y >> controlInfo.init_state.psi;
                 }
                 break;
-            case 4: // vehicle init pose
+            case 4: // vehicle speed
                 if (!line.empty()) {
                     std::istringstream ss(line);
                     ss >> controlInfo.speed;
@@ -170,8 +170,6 @@ int main(int argc, char *argv[]) {
         std::cerr << "Unable to open the file." << std::endl;
     }
 
-
-
     // 创建GNUplot指令
     std::ostringstream gnuplotCmd;
     gnuplotCmd << "set terminal epscairo enhanced color font 'Arial,12' size 5in,3in\n"; // 设置输出为EPS，指定输出文件尺寸和字体
@@ -188,5 +186,24 @@ int main(int argc, char *argv[]) {
     } else {
         std::cerr << "Error: Could not open GNUplot." << std::endl;
     }
+
+    std::ofstream steer_file;
+    steer_file.open("steer.txt");
+    if (steer_file.is_open()) {
+
+        // Write vector elements into the file
+        for (const auto & i:tractor.steerout){
+            steer_file << i <<"\n";
+        }
+
+        // Close the file
+        steer_file.close();
+        std::cout << "Vector elements written to steer.txt successfully." << std::endl;
+    } else {
+        // Display an error message if the file couldn't be opened
+        std::cerr << "Unable to open the file." << std::endl;
+    }
+
+
     return 0;
 }
