@@ -39,6 +39,7 @@ public:
     float gap_=0.2;
     int RND_gear_;
     int Driving_mode_=1;
+    std::vector<double> crs_track_err;
 
 public:
     Controller();

@@ -27,6 +27,7 @@ public:
     double time_length; // simulating time
     double dt;          // sampling time
     double psi_rate=0;
+    vector<double> crs_track_err;
     State vehicle_state;
     State ego_state;
     vector<double> xout;
@@ -154,6 +155,7 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
         ego_refer_path = controller->RefState_;
         time_now += 1;
     }
+    this->crs_track_err = controller->crs_track_err;
     
  }
 

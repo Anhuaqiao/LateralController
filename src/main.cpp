@@ -188,12 +188,14 @@ int main(int argc, char *argv[]) {
     }
 
     std::ofstream steer_file;
-    steer_file.open("steer.txt");
+    string steer_file_name = "steer.txt";
+    steer_file.open(steer_file_name);
     if (steer_file.is_open()) {
-
+        double index_=0.0;
         // Write vector elements into the file
         for (const auto & i:tractor.steerout){
-            steer_file << i <<"\n";
+            steer_file << index_ << " "<< i <<"\n";
+            index_ += 0.01;
         }
 
         // Close the file
@@ -202,6 +204,62 @@ int main(int argc, char *argv[]) {
     } else {
         // Display an error message if the file couldn't be opened
         std::cerr << "Unable to open the file." << std::endl;
+    }
+
+    // 创建GNUplot指令
+    std::ostringstream gnuplotCmd_steer;
+    gnuplotCmd_steer << "set terminal epscairo enhanced color font 'Arial,12' size 5in,3in\n"; // 设置输出为EPS，指定输出文件尺寸和字体
+    gnuplotCmd_steer << "set output 'steer.eps'\n";
+    gnuplotCmd_steer << "plot '"<<steer_file_name<<"' with linespoints title '"<<"steer angle(radius)"<<"\n";// 使用文件中的数据绘制图表
+
+    // 调用GNUplot绘制图表
+    FILE *gnuplotPipe_steer = popen("gnuplot -persistent", "w");
+    if (gnuplotPipe_steer) {
+        fprintf(gnuplotPipe_steer, "%s", gnuplotCmd_steer.str().c_str()); // 发送GNUplot指令
+        fprintf(gnuplotPipe_steer, "exit\n"); // 退出GNUplot
+        pclose(gnuplotPipe_steer);
+    } else {
+        std::cerr << "Error: Could not open GNUplot." << std::endl;
+    }
+
+    std::ofstream crs_track_err;
+    string cross_track_error_file_name = "cross_track_error.txt";
+    crs_track_err.open(cross_track_error_file_name);
+    if (crs_track_err.is_open()) {
+        double index = 0;
+        // Write vector elements into the file
+        for (const auto & i:tractor.crs_track_err){
+            crs_track_err << index << " " << i <<"\n";
+            index += 0.01;
+        }
+
+        // Close the file
+        crs_track_err.close();
+        std::cout << "Vector elements written to crs_track_err.txt successfully." << std::endl;
+    } else {
+        // Display an error message if the file couldn't be opened
+        std::cerr << "Unable to open the file." << std::endl;
+    }
+    double mean_error = calculateMean(tractor.crs_track_err);
+    string mean_error_str = doubleToStringWithPrecisionLimit(mean_error, 3);
+
+    // 创建GNUplot指令
+    std::ostringstream gnuplotCmd_crs_track_err;
+    gnuplotCmd_crs_track_err << "set title \"mean error = "<<mean_error_str<<"\"\n";
+    //gnuplotCmd_crs_track_err << "set title \"{/:Bold Title in Bold} {/:Italic Italic Title}\"\n";
+    gnuplotCmd_crs_track_err << "set title font \"Helvetica,18\" textcolor rgb \"blue\"\n";
+    gnuplotCmd_crs_track_err << "set terminal epscairo enhanced color font 'Arial,12' size 5in,3in\n"; // 设置输出为EPS，指定输出文件尺寸和字体
+    gnuplotCmd_crs_track_err << "set output 'cross_track_error.eps'\n";
+    gnuplotCmd_crs_track_err << "plot '"<<cross_track_error_file_name<<"' with linespoints title '"<<"cross track error"<<"\n";// 使用文件中的数据绘制图表
+
+    // 调用GNUplot绘制图表
+    FILE *gnuplotPipe_crs_track_err = popen("gnuplot -persistent", "w");
+    if (gnuplotPipe_crs_track_err) {
+        fprintf(gnuplotPipe_crs_track_err, "%s", gnuplotCmd_crs_track_err.str().c_str()); // 发送GNUplot指令
+        fprintf(gnuplotPipe_crs_track_err, "exit\n"); // 退出GNUplot
+        pclose(gnuplotPipe_crs_track_err);
+    } else {
+        std::cerr << "Error: Could not open GNUplot." << std::endl;
     }
 
 

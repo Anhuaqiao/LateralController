@@ -118,3 +118,9 @@ double Filter::average_filter(double calculate_angle){
     }
     return calculate_angle;
 }
+
+std::string doubleToStringWithPrecisionLimit(double value, int precision) {
+    std::ostringstream streamObj;
+    streamObj << std::fixed << std::setprecision(precision) << value;
+    return streamObj.str();
+}

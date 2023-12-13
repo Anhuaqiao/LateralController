@@ -47,6 +47,22 @@ double normalizeAngle(double angle);
 double calCurvature(WayPoint pt_prime, WayPoint pt, WayPoint pt_later);
 bool IsEqual(double a,double b);   //判断两值是否相等
 int calTargetIndex(State robot_state, std::vector<State> refer_path);
+std::string doubleToStringWithPrecisionLimit(double value, int precision);
+
+template <typename T>
+double calculateMean(const std::vector<T>& vec) {
+    double sum = 0.0;
+
+    // 计算总和
+    for (double num : vec) {
+        sum += num;
+    }
+
+    // 计算平均值
+    double mean = sum / static_cast<int>(vec.size());
+    return mean;
+}
+
 
 template<typename T>
 double dotProduct(const T& p1, const T& p2) {

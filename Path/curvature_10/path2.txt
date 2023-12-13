@@ -1,5 +1,5 @@
 Policy: Stanley
-Seen length: 10
+Seen length: 100
 Model: Kinematic 
 551.155103 134.033996 0
 3

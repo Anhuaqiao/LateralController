@@ -22,10 +22,13 @@ private:
     double k_soft=0.9; // 减少在低速时位置偏差的小幅度改变对车辆的影响
     double k_yaw_rate=0.5; //航向变化阻尼
     double kd=0;
+    double ki=0;
 
     double last_yaw_=0;
     double last_deta=0;
     double last_angle=0;
+
+    double yaw_error_integral=0;
 
 public:
     double sum_ey=0;
