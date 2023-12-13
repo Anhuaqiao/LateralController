@@ -31,8 +31,8 @@ public:
     double sum_ey=0;
     double yaw_rate=0;
     double cur_speed=0;
-    double m = 1500;
-    double Cy = 1100;
+    double m = 0;
+    double Cy = 1000;
 
 private:
 

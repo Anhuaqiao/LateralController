@@ -16,7 +16,8 @@ using namespace std;
 class Vehicle
 {
 private:
-
+    vector<aiforce::decision::SinglePoint> getPath(vector<aiforce::decision::SinglePoint> current_path_in_world);
+    void Update(double acc, double delta);
 public:
     double x;           // vehicle x position
     double y;           // vehicle y position
@@ -34,8 +35,6 @@ public:
     vector<double> steerout;
 public:
     Vehicle(double x, double y, double psi, double v, double l, double dt);
-    void Update(double acc, double delta);
-    vector<aiforce::decision::SinglePoint> getPath(vector<aiforce::decision::SinglePoint>::const_iterator path_begin, vector<aiforce::decision::SinglePoint>::const_iterator path_end);
     void Simulator(double time_length, const ControlInfo & controlInfo);
     ~Vehicle();
 };
@@ -88,18 +87,18 @@ void Vehicle::Update(double acc, double delta){
  * @return A vector of SinglePoint under expressed in the vehicle frame.
  */
 
-vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision::SinglePoint>::const_iterator path_begin, vector<aiforce::decision::SinglePoint>::const_iterator path_end){ //https://eclass.hna.gr/modules/document/file.php/TOM6113/active_and_passive_transformations.pdf
+vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision::SinglePoint> current_path_in_world){ //https://eclass.hna.gr/modules/document/file.php/TOM6113/active_and_passive_transformations.pdf
     vector<aiforce::decision::SinglePoint> path2;
     aiforce::decision::SinglePoint point2(0,0,0,0);
-    for (auto point1 = path_begin; point1 != path_end; ++point1){ //https://blog.csdn.net/Asimov_Liu/article/details/119931291
-        if(((*point1).x==0)&&((*point1).y==0)){
+    for (auto const & point1: current_path_in_world){ //https://blog.csdn.net/Asimov_Liu/article/details/119931291
+        if((point1.x==0)&&(point1.y==0)){
             point2.x = 0;
             point2.y = 0;
             path2.emplace_back(point2);
         }
         else{
-            double tmp_x = (*point1).x-this->x;
-            double tmp_y = (*point1).y-this->y; 
+            double tmp_x = point1.x-this->x;
+            double tmp_y = point1.y-this->y; 
             point2.x = tmp_x*cos(this->psi) + tmp_y*sin(this->psi);
             point2.y = -tmp_x*sin(this->psi) + tmp_y*cos(this->psi);
             path2.emplace_back(point2);
@@ -115,14 +114,14 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
     double time_now=0;
     aiforce::control::Controller * controller = new Stanley();
 
-    int cur_speed = controlInfo.speed;
+    double cur_speed = controlInfo.speed;
 
     vector<aiforce::decision::SinglePoint>::const_iterator cur_path_begin=controlInfo.pathPoints.begin(), cur_path_end;
     cur_path_end = std::next(controlInfo.pathPoints.begin(), controlInfo.pathLength);
     vector<aiforce::decision::SinglePoint> current_path_in_vehicle,current_path_in_world;
     vector<State> current_path_in_world_state;
     current_path_in_world = slicing<aiforce::decision::SinglePoint>(cur_path_begin,cur_path_end);
-    current_path_in_vehicle = getPath(cur_path_begin,cur_path_end);
+    current_path_in_vehicle = getPath(current_path_in_world);
 
     controller->UpdatePath(current_path_in_vehicle);
     vector<State> ego_refer_path = controller->RefState_;
@@ -150,7 +149,7 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
         cur_path_end = std::next(cur_path_begin, controlInfo.pathLength);
 
         current_path_in_world = slicing<aiforce::decision::SinglePoint>(cur_path_begin,cur_path_end);
-        current_path_in_vehicle = getPath(cur_path_begin, cur_path_end); 
+        current_path_in_vehicle = getPath(current_path_in_world); 
         controller->UpdatePath(current_path_in_vehicle);
         ego_refer_path = controller->RefState_;
         time_now += 1;

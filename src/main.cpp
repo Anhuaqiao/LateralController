@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
                     controlInfo.init_state.y,
                     controlInfo.init_state.psi,
                     controlInfo.speed,
-                    5,
+                    4,
                     controlInfo.dt);
     
     tractor.Simulator(time_length, controlInfo);

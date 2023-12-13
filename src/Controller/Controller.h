@@ -38,7 +38,7 @@ public:
     double min_angle_;
     float gap_=0.2;
     int RND_gear_;
-    int Driving_mode_;
+    int Driving_mode_=1;
 
 public:
     Controller();
