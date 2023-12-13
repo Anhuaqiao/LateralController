@@ -113,7 +113,8 @@ vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision
 void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
 
     double time_now=0;
-    aiforce::control::Controller * controller = new Stanley();
+    aiforce::control::Controller * controller = new Stanley(); //std::shared_ptr<aiforce::control::Controller> controller = std::make_shared<Stanley>();
+
 
     double cur_speed = controlInfo.speed;
 
@@ -156,6 +157,7 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
         time_now += 1;
     }
     this->crs_track_err = controller->crs_track_err;
+    delete controller;
     
  }
 

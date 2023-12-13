@@ -7,7 +7,7 @@ Stanley::Stanley():aiforce::control::Controller(){
       this->k_psi = 1.0;
       this->k_lateral = 0.5;
       this->k_soft = 0.9;
-      this->k_yaw_rate = 0.;
+      this->k_yaw_rate = 0.8;
       this->kd = 0;// not in use
       this->ki = -0.0;
 }
@@ -38,7 +38,7 @@ double Stanley::steer(State cur_state,double cur_speed,double wheel_base,vector<
     double cross_track_error = dotProduct(current_ref_state,negative_y);
 
     double ref_psi_rate = calRefPsiRate(refer_path,current_target_index,cur_speed);    
-    double psi_static_set_point = m*cur_speed*ref_psi_rate/Cy/(1+(3*wheel_base)/5/(2*wheel_base)/5);
+    double psi_static_set_point = m*cur_speed*ref_psi_rate/Cy/(1+(2*wheel_base)/4/(2*wheel_base)/4);
     
     double psi_theta = normalizeAngle(current_ref_state.psi - cur_state.psi);             //航向偏差
     double dist_theta = atan2(k_lateral*cross_track_error, k_soft+cur_speed);                    //横向偏差
