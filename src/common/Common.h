@@ -90,7 +90,7 @@ double calculateMean(const std::vector<T>& vec) {
 
     // 计算总和
     for (double num : vec) {
-        sum += num;
+        sum += abs(num);
     }
 
     // 计算平均值

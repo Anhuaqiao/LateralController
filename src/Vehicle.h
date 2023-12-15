@@ -106,7 +106,7 @@ vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision
     vector<aiforce::decision::SinglePoint> path2;
     aiforce::decision::SinglePoint point2(0,0,0,0);
     for (auto const & point1: current_path_in_world){ //https://blog.csdn.net/Asimov_Liu/article/details/119931291
-        if((point1.x==0)&&(point1.y==0)){
+        if((abs(point1.x)<=0.0000000001)&&(abs(point1.y)<=0.0000000001)){
             continue;
         }
         else{
@@ -144,7 +144,7 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
     double steer_angle;
 
 
-    while (time_now<=time_length)
+    while (time_now<=time_length && !ego_refer_path.empty())
     {   
         State ego_cur_state(0,0,0,this->psi_rate);
         steer_angle = controller->steer(ego_cur_state, cur_speed, L, ego_refer_path);
