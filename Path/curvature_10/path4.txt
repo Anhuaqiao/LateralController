@@ -1,4 +1,4 @@
-Policy: Stanley
+Policy: PurePursuit
 Seen length: 50
 Model: Kinematic 
 542.485976 76.2493447 0.5
