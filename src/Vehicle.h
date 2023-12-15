@@ -6,12 +6,26 @@
 #include <cmath>
 #include <eigen3/Eigen/Dense>
 #include "KinematicModel.h"
-#include "Common.h"
+#include "common/Common.h"
 #include <unordered_map>
 #include "Controller/stanley.h"
+#include "Controller/pure_pursuit.h"
 #define PI 3.1415926
 
 using namespace std;
+
+class ControllerFactory {
+public:
+    static std::unique_ptr<aiforce::control::Controller> createController(const std::string& className) {
+        if (className == "Stanley") {
+            return std::unique_ptr<aiforce::control::Controller>(new Stanley());
+        } else if(className == "PurePursuit"){
+            return std::unique_ptr<aiforce::control::Controller>(new PurePursuit());
+        }else {
+            return nullptr; // 或者抛出异常，视情况而定
+        }
+    }
+};
 
 class Vehicle
 {
@@ -62,7 +76,7 @@ Vehicle::Vehicle(double x, double y, double psi, double v, double L, double dt)
     this->vehicle_state.x = this->x;
     this->vehicle_state.y = this->y;
     this->vehicle_state.psi = this->psi;
-    ego_state.x = L/2;
+    ego_state.x = 0;
     ego_state.y = 0;
     ego_state.psi = 0;
 }
@@ -93,9 +107,7 @@ vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision
     aiforce::decision::SinglePoint point2(0,0,0,0);
     for (auto const & point1: current_path_in_world){ //https://blog.csdn.net/Asimov_Liu/article/details/119931291
         if((point1.x==0)&&(point1.y==0)){
-            point2.x = 0;
-            point2.y = 0;
-            path2.emplace_back(point2);
+            continue;
         }
         else{
             double tmp_x = point1.x-this->x;
@@ -113,9 +125,7 @@ vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision
 void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
 
     double time_now=0;
-    aiforce::control::Controller * controller = new Stanley(); //std::shared_ptr<aiforce::control::Controller> controller = std::make_shared<Stanley>();
-
-
+    std::unique_ptr<aiforce::control::Controller> controller = ControllerFactory::createController(controlInfo.controlMethod);
     double cur_speed = controlInfo.speed;
 
     vector<aiforce::decision::SinglePoint>::const_iterator cur_path_begin=controlInfo.pathPoints.begin(), cur_path_end;
@@ -136,13 +146,15 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
 
     while (time_now<=time_length)
     {   
-        State ego_cur_state(L/2,0,0,this->psi_rate);
+        State ego_cur_state(0,0,0,this->psi_rate);
         steer_angle = controller->steer(ego_cur_state, cur_speed, L, ego_refer_path);
         Update(0, steer_angle);
         xout.emplace_back(this->x);
         yout.emplace_back(this->y);
         psiout.emplace_back(this->psi);
         steerout.emplace_back(steer_angle);
+
+        if(controlInfo.controlMethod == "PurePursuit") controller->steering_angle = steer_angle;
 
         current_path_in_world_state = SingleP2State(current_path_in_world);
         path_index_now = calTargetIndex(vehicle_state, current_path_in_world_state);
@@ -157,7 +169,6 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
         time_now += 1;
     }
     this->crs_track_err = controller->crs_track_err;
-    delete controller;
     
  }
 

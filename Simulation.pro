@@ -25,8 +25,11 @@ DEFINES += QT_DEPRECATED_WARNINGS
 
 SOURCES += ./src/*.cpp
 SOURCES += $$files(./src/Controller/*.cpp, true)
+SOURCES += $$files(./src/common/*.cpp, true)
+SOURCES += $$files(./src/common/*.c, true)
 
 HEADERS += ./src/*.h
 HEADERS += $$files(./src/Controller/*.h, true)
+HEADERS += $$files(./src/common/*.h, true)
 
 INCLUDEPATH += /usr/local/include

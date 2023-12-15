@@ -2,7 +2,7 @@
 #define COMMON_H
 #include <vector>
 #include <queue>
-#include "info_transform_types.h"
+#include "../info_transform_types.h"
 #define PI 3.1415926
 #define	EP	1E-5
 
@@ -23,15 +23,50 @@ struct WayPoint
     WayPoint(double x_,double y_){x=x_;y=y_;}
 };
 
-
-
-
 struct State
 {
     State(double x_,double y_,double psi_,double psi_rate_){x=x_;y=y_;psi=psi_;psi_rate=psi_rate_;} // 横坐标 纵坐标 航向 曲率
     State(){}
     double x,y,psi,psi_rate,K;
+    bool operator==(const State& other) const {
+        return (x == other.x && y == other.y && psi == other.psi && psi_rate == other.psi_rate);
+    }
 };
+
+template <typename T>
+std::vector<T> getSlice(const std::vector<T>& vec, size_t start, size_t end) {
+    if (start >= vec.size()) {
+        return {}; // 如果起始位置大于向量大小，则返回空向量
+    }
+
+    // 修正结束位置，如果超出向量大小则设置为向量的末尾
+    end = std::min(end, vec.size());
+
+    // 使用迭代器和标准算法来获取切片
+    std::vector<T> result;
+    std::copy(vec.begin() + start, vec.begin() + end, std::back_inserter(result));
+    return result;
+}
+
+
+template<typename T>
+State computeUnitDirection(const T& p1, const T& p2) {
+    double dx = p2.x - p1.x;
+    double dy = p2.y - p1.y;
+
+    // Calculate the distance between points
+    double distance = std::sqrt(dx * dx + dy * dy);
+
+    // Calculate the unit direction vector components
+    double unitX = dx / distance;
+    double unitY = dy / distance;
+    double psi = atan2(unitY, unitX);
+
+    State output(unitX,unitY,psi);
+
+    // Create and return the unit direction vector
+    return output;
+}
 
 struct ControlInfo {
     std::string controlMethod;
@@ -46,7 +81,7 @@ struct ControlInfo {
 double normalizeAngle(double angle);
 double calCurvature(WayPoint pt_prime, WayPoint pt, WayPoint pt_later);
 bool IsEqual(double a,double b);   //判断两值是否相等
-int calTargetIndex(State robot_state, std::vector<State> refer_path);
+int calTargetIndex(State robot_state, std::vector<State>& refer_path);
 std::string doubleToStringWithPrecisionLimit(double value, int precision);
 
 template <typename T>
@@ -70,8 +105,13 @@ double dotProduct(const T& p1, const T& p2) {
 }
 
 template<typename T>
-double Pt_dist(const T& pt1, const T& pt2) {
+inline double Pt_dist(const T& pt1, const T& pt2) {
     return sqrt(pow((pt1.x - pt2.x), 2) + pow((pt1.y - pt2.y), 2));
+}
+
+template <typename T>
+int sign(T val) {
+    return (T(0) < val) - (val < T(0));
 }
 
 template<typename T>

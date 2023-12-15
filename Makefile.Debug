@@ -49,20 +49,22 @@ OBJECTS_DIR   = build/
 
 ####### Files
 
-SOURCES       = src/common.cpp \
-		src/KinematicModel.cpp \
+SOURCES       = src/KinematicModel.cpp \
 		src/main.cpp \
 		src/Controller/Controller.cpp \
 		src/Controller/pure_pursuit.cpp \
 		src/Controller/RearWheelFeedback.cpp \
-		src/Controller/stanley.cpp 
-OBJECTS       = build/common.o \
-		build/KinematicModel.o \
+		src/Controller/stanley.cpp \
+		src/common/common.cpp \
+		src/common/dubins.c 
+OBJECTS       = build/KinematicModel.o \
 		build/main.o \
 		build/Controller.o \
 		build/pure_pursuit.o \
 		build/RearWheelFeedback.o \
-		build/stanley.o
+		build/stanley.o \
+		build/common.o \
+		build/dubins.o
 DIST          = ../../Qt5.9.2/5.9.2/gcc_64/mkspecs/features/spec_pre.prf \
 		../../Qt5.9.2/5.9.2/gcc_64/mkspecs/common/unix.conf \
 		../../Qt5.9.2/5.9.2/gcc_64/mkspecs/common/linux.conf \
@@ -217,20 +219,22 @@ DIST          = ../../Qt5.9.2/5.9.2/gcc_64/mkspecs/features/spec_pre.prf \
 		../../Qt5.9.2/5.9.2/gcc_64/mkspecs/features/exceptions.prf \
 		../../Qt5.9.2/5.9.2/gcc_64/mkspecs/features/yacc.prf \
 		../../Qt5.9.2/5.9.2/gcc_64/mkspecs/features/lex.prf \
-		Simulation.pro src/Common.h \
-		src/info_transform_types.h \
+		Simulation.pro src/info_transform_types.h \
 		src/KinematicModel.h \
 		src/Vehicle.h \
 		src/Controller/Controller.h \
 		src/Controller/pure_pursuit.h \
 		src/Controller/RearWheelFeedback.h \
-		src/Controller/stanley.h src/common.cpp \
-		src/KinematicModel.cpp \
+		src/Controller/stanley.h \
+		src/common/Common.h \
+		src/common/dubins.h src/KinematicModel.cpp \
 		src/main.cpp \
 		src/Controller/Controller.cpp \
 		src/Controller/pure_pursuit.cpp \
 		src/Controller/RearWheelFeedback.cpp \
-		src/Controller/stanley.cpp
+		src/Controller/stanley.cpp \
+		src/common/common.cpp \
+		src/common/dubins.c
 QMAKE_TARGET  = sim
 DESTDIR       = bin/
 TARGET        = bin/sim
@@ -258,8 +262,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../Qt5.9.2/5.9.2/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/Common.h src/info_transform_types.h src/KinematicModel.h src/Vehicle.h src/Controller/Controller.h src/Controller/pure_pursuit.h src/Controller/RearWheelFeedback.h src/Controller/stanley.h $(DISTDIR)/
-	$(COPY_FILE) --parents src/common.cpp src/KinematicModel.cpp src/main.cpp src/Controller/Controller.cpp src/Controller/pure_pursuit.cpp src/Controller/RearWheelFeedback.cpp src/Controller/stanley.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/info_transform_types.h src/KinematicModel.h src/Vehicle.h src/Controller/Controller.h src/Controller/pure_pursuit.h src/Controller/RearWheelFeedback.h src/Controller/stanley.h src/common/Common.h src/common/dubins.h $(DISTDIR)/
+	$(COPY_FILE) --parents src/KinematicModel.cpp src/main.cpp src/Controller/Controller.cpp src/Controller/pure_pursuit.cpp src/Controller/RearWheelFeedback.cpp src/Controller/stanley.cpp src/common/common.cpp src/common/dubins.c $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -305,41 +309,48 @@ compiler_clean: compiler_moc_predefs_clean
 
 ####### Compile
 
-build/common.o: src/common.cpp src/Common.h \
-		src/info_transform_types.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/common.o src/common.cpp
-
 build/KinematicModel.o: src/KinematicModel.cpp src/KinematicModel.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/KinematicModel.o src/KinematicModel.cpp
 
 build/main.o: src/main.cpp src/Vehicle.h \
 		src/KinematicModel.h \
-		src/Common.h \
+		src/common/Common.h \
 		src/info_transform_types.h \
 		src/Controller/stanley.h \
-		src/Controller/Controller.h
+		src/Controller/Controller.h \
+		src/Controller/pure_pursuit.h \
+		src/common/dubins.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/main.o src/main.cpp
 
 build/Controller.o: src/Controller/Controller.cpp src/Controller/Controller.h \
 		src/info_transform_types.h \
-		src/Common.h
+		src/common/Common.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/Controller.o src/Controller/Controller.cpp
 
 build/pure_pursuit.o: src/Controller/pure_pursuit.cpp src/Controller/pure_pursuit.h \
-		src/Common.h \
-		src/info_transform_types.h
+		src/common/Common.h \
+		src/info_transform_types.h \
+		src/Controller/Controller.h \
+		src/common/dubins.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/pure_pursuit.o src/Controller/pure_pursuit.cpp
 
 build/RearWheelFeedback.o: src/Controller/RearWheelFeedback.cpp src/Controller/RearWheelFeedback.h \
-		src/Common.h \
+		src/common/Common.h \
 		src/info_transform_types.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/RearWheelFeedback.o src/Controller/RearWheelFeedback.cpp
 
 build/stanley.o: src/Controller/stanley.cpp src/Controller/stanley.h \
-		src/Common.h \
+		src/common/Common.h \
 		src/info_transform_types.h \
 		src/Controller/Controller.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/stanley.o src/Controller/stanley.cpp
+
+build/common.o: src/common/common.cpp src/common/Common.h \
+		src/info_transform_types.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/common.o src/common/common.cpp
+
+build/dubins.o: src/common/dubins.c src/common/dubins.h
+	$(CC) -c $(CFLAGS) $(INCPATH) -o build/dubins.o src/common/dubins.c
 
 ####### Install
 

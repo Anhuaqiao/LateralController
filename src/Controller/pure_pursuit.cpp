@@ -8,23 +8,50 @@
  * @param l_d 前向距离
  * @return
  */
-int PurePursuit::calTargetIndex(State cur_state, vector<State> refer_path, double l_d) {
-    vector<double>dists;
-    for (State xy:refer_path) {
-        double dist = sqrt(pow(xy.x-cur_state.x,2)+pow(xy.y-cur_state.y,2));
-        dists.push_back(dist);
+PurePursuit::PurePursuit(){
+    this->radius_min = 10;
+    this->alpha_max = 5;
+    this->beta_max = 0.2;
+}
+
+void PurePursuit::calcLookAHeadPoint(State cur_state, vector<State>& refer_path){
+    this->i_pw = calTargetIndex(cur_state, refer_path);
+    this->i_pd = refer_path.size()-1;
+    double shortest_dubins_path_length = 200, current_dubins_length;
+    auto start = refer_path.begin() + i_pw; // 第 5 个元素的迭代器
+    for (auto refer_path_point = start; refer_path_point != refer_path.end(); ++refer_path_point){
+        if(radius_min<Pt_dist(refer_path[i_pw],(*refer_path_point)) && Pt_dist(refer_path[i_pw],(*refer_path_point))<12){
+            double q0[3];
+            q0[0] = cur_state.x;
+            q0[1] = cur_state.y;
+            q0[2] = cur_state.psi + steering_angle;
+            double q1[3];
+            q1[0] = (*refer_path_point).x;
+            q1[1] = (*refer_path_point).y;
+            q1[2] = (*refer_path_point).psi;
+            call_dubins_shortest_path( &path, q0, q1, radius_min);
+            current_dubins_length = call_dubins_path_length( &path );
+            if(current_dubins_length<shortest_dubins_path_length){
+                shortest_dubins_path_length = current_dubins_length;
+                i_pd = std::distance(refer_path.begin(), refer_path_point);
+            } 
+        }
     }
-    int min_ind = min_element(dists.begin(),dists.end())-dists.begin(); //返回vector最小元素的下标
+}
 
-    double delta_l = sqrt(pow(refer_path[min_ind].x-cur_state.x,2)+pow(refer_path[min_ind].y-cur_state.y,2)); //先找到目标路径上距离 当前位置最近的点
-
-    while (l_d>delta_l && min_ind<refer_path.size()-1){ //从最近点向 index增大方向搜索,找到最接近 l_d 的 index
-        delta_l = sqrt(pow(refer_path[min_ind+1].x-cur_state.x,2)+pow(refer_path[min_ind+1].y-cur_state.y,2));
-        min_ind+=1;
-    }
-
-
-    return min_ind;
+void PurePursuit::OutOfPath(State cur_state, vector<State>& refer_path){
+    double pd_angle = atan2(refer_path[i_pd].y, refer_path[i_pd].x);
+    double pdl_angle = pd_angle - sign(pd_angle)*PI/2;
+    double alpha = Pt_dist(cur_state, refer_path[this->i_pw]) < alpha_max? Pt_dist(cur_state, refer_path[this->i_pw])/alpha_max : 1;
+    double beta = refer_path[i_pw].K >= refer_path[i_pd].K? 0 : (refer_path[i_pd].K - refer_path[i_pw].K)/beta_max;
+    beta = beta > 1? 1:beta;
+    double tau = (1 - alpha)*beta;
+    double p_wd_dist = Pt_dist(refer_path[i_pw], refer_path[i_pd]);
+    double p_dl_dist = p_wd_dist*tan(pd_angle);
+    double pl_x = refer_path[i_pd].x + tau*p_dl_dist*cos(pdl_angle);
+    double pl_y = refer_path[i_pd].y + tau*p_dl_dist*sin(pdl_angle);
+    State pl_tmp(pl_x, pl_y, 0,0);
+    pl.emplace_back(pl_tmp);
 }
 
 /**
@@ -36,33 +63,18 @@ int PurePursuit::calTargetIndex(State cur_state, vector<State> refer_path, doubl
  * @param L 轴距
  * @return 转角控制量
  */
-double PurePursuit::purePursuitControl(State cur_state,double cur_speed, vector<State> refer_path,double L) {
+double PurePursuit::steer(State cur_state,double cur_speed,double wheel_base, vector<State> refer_path)  {
+    calcLookAHeadPoint(cur_state, refer_path);
+    OutOfPath(cur_state, refer_path);
+    double theta_ = atan2(pl.back().y-cur_state.y, pl.back().x-cur_state.x);
+    State pl_tmp = pl.back();
+    double l_d = Pt_dist(pl_tmp, cur_state);
+    double delta = atan2(2*wheel_base*sin(theta_),l_d); //
 
-    double l_d=cur_speed*5;  // 参考预瞄距离
+    double cross_track_error = Pt_dist(refer_path[i_pw],cur_state);
+    crs_track_err.emplace_back(cross_track_error);
 
-    int target_index=calTargetIndex(cur_state,refer_path,l_d);
-    double alpha = atan2(refer_path[target_index].x-cur_state.x,refer_path[target_index].y-cur_state.y)-cur_state.psi;
-    double delta = atan2(2*L*sin(alpha),l_d); //L 轴距
-//    double k=tan(psi);
-//    double b=robot_state[1]-k*robot_state[0];
-//    double x2=robot_state[0]+1;
-//    double y2=x2*k+b;
-//    double e_y= getDistancePointToLine(WayPoint(current_ref_point[0],current_ref_point[1]), WayPoint(x2,y2), WayPoint(robot_state[0],robot_state[1]));
-//    if((robot_state[0]-current_ref_point[0])*psi-(robot_state[1]-current_ref_point[1])>0){
-//    //if((robot_state[1]-current_ref_point[1])*cos(psi_t)-(robot_state[0]-current_ref_point[0])*sin(psi_t)<=0){
-//        e_y = e_y;
-//    }else{
-//        e_y = -e_y;
-//    }
-
-//    std::cout<<"psi "<<psi<<std::endl;
-//    std::cout<<"e_y "<<e_y<<std::endl;
-
-//    double delta = atan2(2*L*e_y,pow(l_d,2));
-
-
-
-    return delta;
+    return  steer_limit(delta);
 
 }
 

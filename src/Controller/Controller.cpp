@@ -38,6 +38,7 @@ double Controller::calRefPsiRate(std::vector<State>& refer_path, int& target_ind
     return target_index==(refer_path.size()-1)? (refer_path[target_index].psi-refer_path[target_index-1].psi)/Pt_dist(refer_path[target_index],refer_path[target_index-1])/cur_speed:(refer_path[target_index+1].psi-refer_path[target_index].psi)/Pt_dist(refer_path[target_index+1],refer_path[target_index])/cur_speed;
 }
 
+
 /**
  * @brief 函数简要说明-更新参考路径
  * @param index    参数1
@@ -216,7 +217,7 @@ bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
         }
 
         //curvature: r(t) =(x(t),y(t)),则曲率k=(x'y" - x"y')/((x')^2 + (y')^2)^(3/2).
-            RefState_[i].K= (ddx * dy - ddy * dx) / pow((dy * dy + dx * dx), 3 / 2) ;// 曲率k计算
+            RefState_[i].K= abs((ddx * dy - ddy * dx) / pow((dy * dy + dx * dx), 3 / 2)) ;// 曲率k计算
     }
     return true;
 }

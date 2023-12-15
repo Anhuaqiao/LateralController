@@ -4,7 +4,7 @@
 #include <vector>
 #include<cmath>
 #include <algorithm>
-#include "../Common.h"
+#include "../common/Common.h"
 using namespace std;
 
 #define PI 3.1415926

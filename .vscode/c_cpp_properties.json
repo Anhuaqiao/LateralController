@@ -4,7 +4,8 @@
             "name": "Linux",
             "includePath": [
                 "/home/xiaohan/Simulation_Kinematics/LateralControl/**",
-                "/usr/local/include/**"
+                "/usr/local/include/**",
+                "/usr/include/**"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/g++",

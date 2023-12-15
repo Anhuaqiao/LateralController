@@ -12,7 +12,7 @@
 #include <vector>
 #include <eigen3/Eigen/Eigen>
 #include "../info_transform_types.h"
-#include "../Common.h"
+#include "../common/Common.h"
 #include <unordered_map>
 #define PI 3.1415926
 
@@ -30,6 +30,7 @@ class Controller
 
 
 public:
+    double steering_angle;
     Filter avgfilt;
     vector<State> RefState_;
     bool PreTurn_=true; 

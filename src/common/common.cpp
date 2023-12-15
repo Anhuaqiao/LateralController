@@ -34,14 +34,13 @@ double calCurvature(WayPoint pt_prime, WayPoint pt, WayPoint pt_later)
  * @param angle
  * @return
  */
+
 double normalizeAngle(double angle) {
-    while(angle>PI){
-        angle-=2.0*PI;
+    angle = fmod(angle + PI, 2.0 * PI); // 将角度调整到 [0, 2π] 范围内
+    if (angle < 0) {
+        angle += 2.0 * PI; // 将负角度转换为正角度
     }
-    while(angle<-PI){
-        angle+=2.0*PI;
-    }
-    return angle;
+    return angle - PI; // 将角度值调整到 [-π, π] 范围内
 }
 
 
@@ -51,7 +50,7 @@ double normalizeAngle(double angle) {
  * @param refer_path 参考轨迹（数组）
  * @return
  */
-int calTargetIndex(State robot_state, vector<State> refer_path) {
+int calTargetIndex(State robot_state, vector<State>& refer_path) {
     vector<double>dists;
     for (State xy:refer_path) {
         double dist = sqrt(pow(xy.x-robot_state.x,2)+pow(xy.y-robot_state.y,2));

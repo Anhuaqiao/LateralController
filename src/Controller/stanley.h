@@ -7,8 +7,8 @@
 #include <vector>
 #include<cmath>
 #include <algorithm>
-#include<eigen3/Eigen/Dense>
-#include "../Common.h"
+#include <eigen3/Eigen/Dense>
+#include "../common/Common.h"
 #include "Controller.h"
 
 using namespace std;
@@ -42,7 +42,7 @@ private:
 public:
     void set_parameter(double k_psi,double k_lateral,double k_soft,double k_yaw_rate,double kd);
     Stanley();
-    ~Stanley() = default;
+    ~Stanley();
     double steer(State cur_state,double cur_speed,double wheel_base, vector<State> refer_path) override;
     };
 
