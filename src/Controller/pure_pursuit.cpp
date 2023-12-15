@@ -43,7 +43,7 @@ void PurePursuit::OutOfPath(State cur_state, vector<State>& refer_path){
     double pd_angle = atan2(refer_path[i_pd].y, refer_path[i_pd].x);
     double pdl_angle = pd_angle - sign(pd_angle)*PI/2;
     double alpha = Pt_dist(cur_state, refer_path[this->i_pw]) < alpha_max? Pt_dist(cur_state, refer_path[this->i_pw])/alpha_max : 1;
-    double beta = abs(refer_path[i_pw].K - refer_path[i_pd].K)>beta_max? 1 : (refer_path[i_pd].K - refer_path[i_pw].K)/beta_max;
+    double beta = abs(refer_path[i_pw].K - refer_path[i_pd].K)>beta_max? 1 : abs(refer_path[i_pd].K - refer_path[i_pw].K)/beta_max;
     double tau = (1 - alpha)*beta;
     double p_wd_dist = Pt_dist(refer_path[i_pw], refer_path[i_pd]);
     double p_dl_dist = p_wd_dist*tan(pd_angle);
