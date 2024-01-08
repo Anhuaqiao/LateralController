@@ -53,7 +53,7 @@ bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
     vector<decision::SinglePoint> path_temp;
     RefState_.clear();
     double dx,dy,dist;
-    bool Backgear_flag=false;
+    bool Backgear_flag=true;
     if(msg.size()<2)
         return false;
     decision::SinglePoint last_pt=msg[0];
@@ -194,7 +194,7 @@ bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
 
     if(Backgear_flag)
         for(unsigned int i=0;i<RefState_.size();i++)
-            RefState_[i].psi=(RefState_[i].psi-PI)>0?(RefState_[i].psi-PI):(RefState_[i].psi+PI);
+            RefState_[i].psi=RefState_[i].psi<0?(RefState_[i].psi+PI):(RefState_[i].psi-PI);
 
     // 求目标路径曲率
     double ddx,ddy;

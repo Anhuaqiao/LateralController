@@ -48,6 +48,8 @@ public:
     vector<double> yout;
     vector<double> psiout;
     vector<double> steerout;
+private:
+    std::queue<double> steer_queue;
 public:
     Vehicle(double x, double y, double psi, double v, double l, double dt);
     void Simulator(double time_length, const ControlInfo & controlInfo);
@@ -143,18 +145,30 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
 
     double steer_angle;
 
+    State final_pt = SingleP2State(controlInfo.pathPoints.back());
 
     while (time_now<=time_length)
     {   
-        State ego_cur_state(0,0,0,this->psi_rate);
+        State ego_cur_state(-1.0,0,0,this->psi_rate);
         steer_angle = controller->steer(ego_cur_state, cur_speed, L, ego_refer_path);
-        Update(0, steer_angle);
+        if(steer_queue.size()<1) {
+            steer_queue.push(steer_angle);
+        }
+        else{
+            Update(0, steer_queue.front());
+            steer_queue.pop();
+            steer_queue.push(steer_angle);
+        } 
         xout.emplace_back(this->x);
         yout.emplace_back(this->y);
         psiout.emplace_back(this->psi);
         steerout.emplace_back(steer_angle);
-
-        if(controlInfo.controlMethod == "PurePursuit") controller->steering_angle = steer_angle;
+        double tmp = Pt_dist(final_pt, vehicle_state);
+        cout << tmp << endl;
+        if(tmp<5) {
+            break;
+        }
+        controller->steering_angle = steer_angle;
 
         current_path_in_world_state = SingleP2State(current_path_in_world);
         path_index_now = calTargetIndex(vehicle_state, current_path_in_world_state);

@@ -19,9 +19,9 @@ class Stanley :public aiforce::control::Controller{
 private:
     double k_psi=1;  //横向偏差的系数
     double k_lateral=1;  //航向偏差系数
-    double k_soft=0.9; // 减少在低速时位置偏差的小幅度改变对车辆的影响
-    double k_yaw_rate=0.5; //航向变化阻尼
-    double kd=0;
+    double k_soft=0; // 减少在低速时位置偏差的小幅度改变对车辆的影响
+    double k_yaw_rate=0; //航向变化阻尼
+    double k_steer=0;
     double ki=0;
 
     double last_yaw_=0;
@@ -40,7 +40,7 @@ public:
 private:
 
 public:
-    void set_parameter(double k_psi,double k_lateral,double k_soft,double k_yaw_rate,double kd);
+    void set_parameter(double k_psi,double k_lateral,double k_soft,double k_yaw_rate,double k_steer, double ki);
     Stanley();
     ~Stanley();
     double steer(State cur_state,double cur_speed,double wheel_base, vector<State> refer_path) override;

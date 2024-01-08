@@ -1,8 +1,12 @@
+#include <QVector>
+#include <QPointF>
 #include <iostream>
 #include <iomanip>
 #include <math.h>
 #include <limits.h>
 #include <ctime>
+#include <QSettings>
+#include <qdir.h>
 #include <fstream>
 #include<eigen3/Eigen/Dense>
 #include "Common.h"
@@ -57,6 +61,13 @@ int calTargetIndex(State robot_state, vector<State>& refer_path) {
         dists.push_back(dist);
     }
     return min_element(dists.begin(),dists.end())-dists.begin(); //返回vector最小元素的下标
+}
+
+State SingleP2State(const aiforce::decision::SinglePoint & singlep) {
+    State tmp;
+    tmp.x = singlep.x;
+    tmp.y = singlep.y;
+    return tmp;
 }
 
 std::vector<State> SingleP2State(std::vector<aiforce::decision::SinglePoint> & singlep){

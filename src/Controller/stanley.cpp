@@ -5,20 +5,20 @@
 
 Stanley::Stanley():aiforce::control::Controller(){
       this->k_psi = 1.0;
-      this->k_lateral = 0.5;
-      this->k_soft = 0.9;
-      this->k_yaw_rate = 0.8;
-      this->kd = 0;// not in use
+      this->k_lateral = 1;
+      this->k_soft = 0.0;
+      this->k_yaw_rate = 0;
+      this->k_steer = 0;// not in use
       this->ki = -0.0;
 }
 
-void Stanley::set_parameter(double k_psi,double k_lateral,double k_soft,double k_yaw_rate,double kd)
+void Stanley::set_parameter(double k_psi,double k_lateral,double k_soft,double k_yaw_rate,double k_steer, double ki)
 {
     this->k_psi = k_psi;
     this->k_lateral = k_lateral;
     this->k_soft = k_soft;
     this->k_yaw_rate = k_yaw_rate;
-    this->kd = kd;
+    this->k_steer = k_steer;
     this->ki = ki;
 }
 
@@ -41,11 +41,13 @@ double Stanley::steer(State cur_state,double cur_speed,double wheel_base,vector<
     double psi_static_set_point = m*cur_speed*ref_psi_rate/Cy/(1+(2*wheel_base)/4/(2*wheel_base)/4);
     
     double psi_theta = normalizeAngle(current_ref_state.psi - cur_state.psi);             //航向偏差
-    double dist_theta = atan2(k_lateral*cross_track_error, k_soft+cur_speed);                    //横向偏差
+    double dist_theta = atan2(k_lateral*cross_track_error, k_soft+fabs(cur_speed));                    //横向偏差
     double psi_rate_theta = k_yaw_rate*(cur_state.psi_rate-ref_psi_rate); 
 
     yaw_error_integral += psi_theta;
-    double delta = (psi_theta-psi_static_set_point)+dist_theta+psi_rate_theta+ki*yaw_error_integral;
+    double delta = (-psi_theta-psi_static_set_point)+dist_theta+psi_rate_theta+ki*yaw_error_integral;
+
+    delta = k_steer*(this->steering_angle-delta) + delta;
 
     crs_track_err.emplace_back(cross_track_error);
     return steer_limit(delta);

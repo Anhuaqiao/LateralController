@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
                     controlInfo.init_state.y,
                     controlInfo.init_state.psi,
                     controlInfo.speed,
-                    4,
+                    2,
                     controlInfo.dt);
     
     tractor.Simulator(time_length, controlInfo);
@@ -154,28 +154,28 @@ int main(int argc, char *argv[]) {
 
     // Check if the file is open
     if (outputFile.is_open()) {
-        std::cout << tractor.xout.size() << std::endl;
+        //std::cout << tractor.xout.size() << std::endl;
 
         // Write vector elements into the file
         for (auto i=0;i<tractor.xout.size();i++) {
-            std::cout << "(" << tractor.xout[i] << "," << tractor.yout[i] << ")"<< std::endl;
+        //    std::cout << "(" << tractor.xout[i] << "," << tractor.yout[i] << ")"<< std::endl;
             outputFile << tractor.xout[i] << " " << tractor.yout[i]<<"\n";
         }
 
         // Close the file
         outputFile.close();
-        std::cout << "Vector elements written to output.txt successfully." << std::endl;
+        // std::cout << "Vector elements written to output.txt successfully." << std::endl;
     } else {
         // Display an error message if the file couldn't be opened
         std::cerr << "Unable to open the file." << std::endl;
     }
 
-    // 创建GNUplot指令
+  // 创建GNUplot指令
     std::ostringstream gnuplotCmd;
     gnuplotCmd << "set terminal epscairo enhanced color font 'Arial,12' size 5in,3in\n"; // 设置输出为EPS，指定输出文件尺寸和字体
     gnuplotCmd << "set output 'output.eps'\n";
-    gnuplotCmd << "plot '"<<outputfilename<<"' with linespoints title '"<<"vehicle path"<<"', "
-               << "'"<<intputfilename<<"'every ::7 with linespoints title '"<<"refer path"<<"'\n";// 使用文件中的数据绘制图表
+    gnuplotCmd << "plot '"<<outputfilename<<"' with linespoints title '"<<"vehicle path"<<"' lt 2 linecolor 2 ps 0.1, "
+               << "'"<<intputfilename<<"'every ::7 with linespoints title '"<<"refer path"<<"' lt 3 linecolor 3 ps 0.1\n";// 使用文件中的数据绘制图表
 
     // 调用GNUplot绘制图表
     FILE *gnuplotPipe = popen("gnuplot -persistent", "w");
@@ -186,6 +186,7 @@ int main(int argc, char *argv[]) {
     } else {
         std::cerr << "Error: Could not open GNUplot." << std::endl;
     }
+
 
     std::ofstream steer_file;
     string steer_file_name = "steer.txt";

@@ -131,8 +131,14 @@ std::vector<T> slicing(typename std::vector<T>::const_iterator X,
     // Return the results
     return vector;
 }
+
+State SingleP2State(const aiforce::decision::SinglePoint & singlep);
 std::vector<State> SingleP2State(std::vector<aiforce::decision::SinglePoint> & singlep);
 
+template <typename T>
+T degree2rad(T deg){
+    return deg*PI/180;
+}
 
 class Filter
 {

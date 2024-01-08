@@ -11,7 +11,7 @@
             "program": "${workspaceFolder}/bin/sim", //需要运行的是当前打开文件的目录中，名字和当前文件相同，但扩展名为exe的程序
             "args": [
                 "-i",
-                "./Path/curvature_10/path3.txt",
+                "./Path/coordinates1.txt",
                 "-o",
                 "output.txt"
             ],
