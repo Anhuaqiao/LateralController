@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <chrono>
 #include <eigen3/Eigen/Dense>
 #include "KinematicModel.h"
 #include "Common.h"
@@ -21,6 +22,7 @@ private:
     void Update(double acc, double delta);
     State getState();
 public:
+    long long accumulation_time;
     double x;           // vehicle x position
     double y;           // vehicle y position
     double psi;         // vehicle heading
@@ -144,11 +146,20 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
 
     double steer_angle;
 
+    // Variable to store the total accumulation time
+    accumulation_time = 0;
+
+    // Your loop
+    for (int i = 0; i < 1000000; ++i) {
 
     while (time_now<=time_length)
     {   
         State cur_state = getState();
+        auto line_start = std::chrono::high_resolution_clock::now();
         steer_angle = controller->steer(cur_state, cur_speed, L, refer_path);
+        auto line_end = std::chrono::high_resolution_clock::now();
+        auto line_duration = std::chrono::duration_cast<std::chrono::nanoseconds>(line_end - line_start);
+        accumulation_time += line_duration.count();
         Update(0, steer_angle);
         xout.emplace_back(this->x);
         yout.emplace_back(this->y);
@@ -168,7 +179,6 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
     }
     this->crs_track_err = controller->crs_track_err;
     delete controller;
-    
  }
 
 #endif

@@ -60,6 +60,17 @@ int calTargetIndex(State robot_state, vector<State> refer_path) {
     return min_element(dists.begin(),dists.end())-dists.begin(); //返回vector最小元素的下标
 }
 
+double calTargetIndexDistance(State robot_state, vector<State> refer_path) {
+    vector<double>dists;
+    for (State xy:refer_path) {
+        double dist = sqrt(pow(xy.x-robot_state.x,2)+pow(xy.y-robot_state.y,2));
+        dists.push_back(dist);
+    }
+    int ind =  min_element(dists.begin(),dists.end())-dists.begin(); //返回vector最小元素的下标
+    return dists[ind];
+}
+
+
 std::vector<State> SingleP2State(std::vector<aiforce::decision::SinglePoint> & singlep){
     State tmp;
     std::vector<State> stateOut;

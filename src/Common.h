@@ -47,6 +47,7 @@ double normalizeAngle(double angle);
 double calCurvature(WayPoint pt_prime, WayPoint pt, WayPoint pt_later);
 bool IsEqual(double a,double b);   //判断两值是否相等
 int calTargetIndex(State robot_state, std::vector<State> refer_path);
+double calTargetIndexDistance(State robot_state, std::vector<State> refer_path);
 std::string doubleToStringWithPrecisionLimit(double value, int precision);
 
 template <typename T>

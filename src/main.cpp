@@ -262,6 +262,6 @@ int main(int argc, char *argv[]) {
         std::cerr << "Error: Could not open GNUplot." << std::endl;
     }
 
-
+    std::cout << "total controller running time: " << tractor.accumulation_time<<std::endl; 
     return 0;
 }

@@ -21,6 +21,10 @@ MatrixXd LQR::calRicatti(MatrixXd A, MatrixXd B, MatrixXd Q, MatrixXd R){
 
 double LQR::steer(State cur_state,double cur_speed,double L, vector<State> refer_path){
     int target_index = calTargetIndex(cur_state, refer_path);
+    double symbol = normalizeAngle(refer_path[target_index].psi-atan2(refer_path[target_index].y-cur_state.y, refer_path[target_index].x-cur_state.x))>0? 1:-1;
+    double cross_track_error = calTargetIndexDistance(cur_state, refer_path);
+    cross_track_error *=symbol;
+    crs_track_err.push_back(cross_track_error);
     int target_index_curvature = refer_path[target_index].K;
     double ref_delta = atan2(L*target_index_curvature, 1);
     double ref_psi = refer_path[target_index].psi;

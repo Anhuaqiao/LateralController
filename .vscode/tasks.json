@@ -21,6 +21,11 @@
             "label": "clean",
             "type": "shell",
             "command": "make clean"
+        },
+        {
+            "label": "void",
+            "type": "shell",
+            "command": "echo"
         }
     ]
 }
