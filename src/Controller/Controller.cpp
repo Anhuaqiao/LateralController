@@ -50,7 +50,7 @@ double Controller::calRefPsiRate(std::vector<State>& refer_path, int& target_ind
 bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
 {
     vector<decision::SinglePoint> path_temp;
-    RefState_.clear();
+    RefPath.clear();
     double dx,dy,dist;
     bool Backgear_flag=false;
     if(msg.size()<2)
@@ -164,7 +164,7 @@ bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
                 pt_state.psi=atan2((path_temp[i+1].y-path_temp[i].y),(path_temp[i+1].x-path_temp[i].x));
             else
                 pt_state.psi=atan2((path_temp[i].y-path_temp[i].y),(path_temp[i].x-path_temp[i-1].x));
-            RefState_.push_back(pt_state);
+            RefPath.push_back(pt_state);
         }
         dist=Pt_dist(path_temp[path_temp.size()-1],path_temp[path_temp.size()-2]);
         dx=(path_temp[path_temp.size()-1].x-path_temp[path_temp.size()-2].x)/dist*gap_;
@@ -174,7 +174,7 @@ bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
             pt_state.x=path_temp[path_temp.size()-1].x+dx*i;
             pt_state.y=path_temp[path_temp.size()-1].y+dy*i;
             pt_state.psi=atan2(dy,dx);
-            RefState_.push_back(pt_state);
+            RefPath.push_back(pt_state);
         }
     }
     else
@@ -187,36 +187,36 @@ bool Controller::UpdatePath(vector<decision::SinglePoint> msg)
                 pt_state.psi=atan2((path_temp[i+1].y-path_temp[i].y),(path_temp[i+1].x-path_temp[i].x));
             else
                 pt_state.psi=atan2((path_temp[i].y-path_temp[i].y),(path_temp[i].x-path_temp[i-1].x));
-            RefState_.push_back(pt_state);
+            RefPath.push_back(pt_state);
         }
     }
 
     if(Backgear_flag)
-        for(unsigned int i=0;i<RefState_.size();i++)
-            RefState_[i].psi=(RefState_[i].psi-PI)>0?(RefState_[i].psi-PI):(RefState_[i].psi+PI);
+        for(unsigned int i=0;i<RefPath.size();i++)
+            RefPath[i].psi=(RefPath[i].psi-PI)>0?(RefPath[i].psi-PI):(RefPath[i].psi+PI);
 
     // 求目标路径曲率
     double ddx,ddy;
-    for(int i=0;i<RefState_.size();i++){
+    for(int i=0;i<RefPath.size();i++){
         if (i==0){
-             dx = RefState_[i+1].x - RefState_[i].x;
-             dy = RefState_[i+1].y - RefState_[i].y;
-             ddx = RefState_[2].x + RefState_[0].x - 2*RefState_[1].x;
-             ddy = RefState_[2].y + RefState_[0].y - 2*RefState_[1].y;
-        }else if(i==RefState_.size()-1){
-             dx = RefState_[i].x - RefState_[i-1].x;
-             dy = RefState_[i].y - RefState_[i-1].y;
-             ddx = RefState_[i].x + RefState_[i-2].x - 2*RefState_[i-1].x;
-             ddy = RefState_[i].y + RefState_[i-2].y - 2*RefState_[i-1].y;
+             dx = RefPath[i+1].x - RefPath[i].x;
+             dy = RefPath[i+1].y - RefPath[i].y;
+             ddx = RefPath[2].x + RefPath[0].x - 2*RefPath[1].x;
+             ddy = RefPath[2].y + RefPath[0].y - 2*RefPath[1].y;
+        }else if(i==RefPath.size()-1){
+             dx = RefPath[i].x - RefPath[i-1].x;
+             dy = RefPath[i].y - RefPath[i-1].y;
+             ddx = RefPath[i].x + RefPath[i-2].x - 2*RefPath[i-1].x;
+             ddy = RefPath[i].y + RefPath[i-2].y - 2*RefPath[i-1].y;
         }else{
-             dx = RefState_[i+1].x - RefState_[i].x;
-             dy = RefState_[i+1].y - RefState_[i].y;
-             ddx = RefState_[i+1].x + RefState_[i-1].x - 2*RefState_[i].x;
-             ddy = RefState_[i+1].y + RefState_[i-1].y - 2*RefState_[i].y;
+             dx = RefPath[i+1].x - RefPath[i].x;
+             dy = RefPath[i+1].y - RefPath[i].y;
+             ddx = RefPath[i+1].x + RefPath[i-1].x - 2*RefPath[i].x;
+             ddy = RefPath[i+1].y + RefPath[i-1].y - 2*RefPath[i].y;
         }
 
         //curvature: r(t) =(x(t),y(t)),则曲率k=(x'y" - x"y')/((x')^2 + (y')^2)^(3/2).
-            RefState_[i].K= (ddx * dy - ddy * dx) / pow((dy * dy + dx * dx), 3 / 2) ;// 曲率k计算
+            RefPath[i].K= (ddx * dy - ddy * dx) / pow((dy * dy + dx * dx), 3 / 2) ;// 曲率k计算
     }
     return true;
 }

@@ -13,6 +13,7 @@
 #include <eigen3/Eigen/Eigen>
 #include "../info_transform_types.h"
 #include "../Common.h"
+#include "../KinematicModel.h"
 #include <unordered_map>
 #define PI 3.1415926
 
@@ -31,7 +32,7 @@ class Controller
 
 public:
     Filter avgfilt;
-    vector<State> RefState_;
+    vector<State> RefPath;
     bool PreTurn_=true; 
     int refpath_limitnum; 
     double max_angle_;

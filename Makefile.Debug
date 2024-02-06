@@ -53,6 +53,7 @@ SOURCES       = src/common.cpp \
 		src/KinematicModel.cpp \
 		src/main.cpp \
 		src/Controller/Controller.cpp \
+		src/Controller/LQR.cpp \
 		src/Controller/pure_pursuit.cpp \
 		src/Controller/RearWheelFeedback.cpp \
 		src/Controller/stanley.cpp 
@@ -60,6 +61,7 @@ OBJECTS       = build/common.o \
 		build/KinematicModel.o \
 		build/main.o \
 		build/Controller.o \
+		build/LQR.o \
 		build/pure_pursuit.o \
 		build/RearWheelFeedback.o \
 		build/stanley.o
@@ -222,12 +224,14 @@ DIST          = ../../Qt5.9.2/5.9.2/gcc_64/mkspecs/features/spec_pre.prf \
 		src/KinematicModel.h \
 		src/Vehicle.h \
 		src/Controller/Controller.h \
+		src/Controller/LQR.h \
 		src/Controller/pure_pursuit.h \
 		src/Controller/RearWheelFeedback.h \
 		src/Controller/stanley.h src/common.cpp \
 		src/KinematicModel.cpp \
 		src/main.cpp \
 		src/Controller/Controller.cpp \
+		src/Controller/LQR.cpp \
 		src/Controller/pure_pursuit.cpp \
 		src/Controller/RearWheelFeedback.cpp \
 		src/Controller/stanley.cpp
@@ -258,8 +262,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents ../../Qt5.9.2/5.9.2/gcc_64/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents src/Common.h src/info_transform_types.h src/KinematicModel.h src/Vehicle.h src/Controller/Controller.h src/Controller/pure_pursuit.h src/Controller/RearWheelFeedback.h src/Controller/stanley.h $(DISTDIR)/
-	$(COPY_FILE) --parents src/common.cpp src/KinematicModel.cpp src/main.cpp src/Controller/Controller.cpp src/Controller/pure_pursuit.cpp src/Controller/RearWheelFeedback.cpp src/Controller/stanley.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents src/Common.h src/info_transform_types.h src/KinematicModel.h src/Vehicle.h src/Controller/Controller.h src/Controller/LQR.h src/Controller/pure_pursuit.h src/Controller/RearWheelFeedback.h src/Controller/stanley.h $(DISTDIR)/
+	$(COPY_FILE) --parents src/common.cpp src/KinematicModel.cpp src/main.cpp src/Controller/Controller.cpp src/Controller/LQR.cpp src/Controller/pure_pursuit.cpp src/Controller/RearWheelFeedback.cpp src/Controller/stanley.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -317,13 +321,22 @@ build/main.o: src/main.cpp src/Vehicle.h \
 		src/Common.h \
 		src/info_transform_types.h \
 		src/Controller/stanley.h \
-		src/Controller/Controller.h
+		src/Controller/Controller.h \
+		src/Controller/LQR.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/main.o src/main.cpp
 
 build/Controller.o: src/Controller/Controller.cpp src/Controller/Controller.h \
 		src/info_transform_types.h \
-		src/Common.h
+		src/Common.h \
+		src/KinematicModel.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/Controller.o src/Controller/Controller.cpp
+
+build/LQR.o: src/Controller/LQR.cpp src/Controller/LQR.h \
+		src/Common.h \
+		src/info_transform_types.h \
+		src/Controller/Controller.h \
+		src/KinematicModel.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/LQR.o src/Controller/LQR.cpp
 
 build/pure_pursuit.o: src/Controller/pure_pursuit.cpp src/Controller/pure_pursuit.h \
 		src/Common.h \
@@ -338,7 +351,8 @@ build/RearWheelFeedback.o: src/Controller/RearWheelFeedback.cpp src/Controller/R
 build/stanley.o: src/Controller/stanley.cpp src/Controller/stanley.h \
 		src/Common.h \
 		src/info_transform_types.h \
-		src/Controller/Controller.h
+		src/Controller/Controller.h \
+		src/KinematicModel.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o build/stanley.o src/Controller/stanley.cpp
 
 ####### Install

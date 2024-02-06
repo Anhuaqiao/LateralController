@@ -9,6 +9,7 @@
 #include "Common.h"
 #include <unordered_map>
 #include "Controller/stanley.h"
+#include "Controller/LQR.h"
 #define PI 3.1415926
 
 using namespace std;
@@ -18,6 +19,7 @@ class Vehicle
 private:
     vector<aiforce::decision::SinglePoint> getPath(vector<aiforce::decision::SinglePoint> current_path_in_world);
     void Update(double acc, double delta);
+    State getState();
 public:
     double x;           // vehicle x position
     double y;           // vehicle y position
@@ -88,6 +90,12 @@ void Vehicle::Update(double acc, double delta){
  * @return A vector of SinglePoint under expressed in the vehicle frame.
  */
 
+State Vehicle::getState(){
+    State cur_state(this->vehicle_state.x, this->vehicle_state.y, this->vehicle_state.psi, this->vehicle_state.psi);
+    return cur_state;
+};
+
+
 vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision::SinglePoint> current_path_in_world){ //https://eclass.hna.gr/modules/document/file.php/TOM6113/active_and_passive_transformations.pdf
     vector<aiforce::decision::SinglePoint> path2;
     aiforce::decision::SinglePoint point2(0,0,0,0);
@@ -113,31 +121,34 @@ vector<aiforce::decision::SinglePoint> Vehicle::getPath(vector<aiforce::decision
 void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
 
     double time_now=0;
-    aiforce::control::Controller * controller = new Stanley(); //std::shared_ptr<aiforce::control::Controller> controller = std::make_shared<Stanley>();
+    MatrixXd Q(3,3);
+    Q<<3,0,0,
+            0,3,0,
+            0,0,3;
+    MatrixXd R(2,2);
+    R<<2.0,0.0,
+            0.0,2;
+
+    aiforce::control::Controller * controller = new LQR(this->x, this->y, this->psi, this->v, this->L, this->dt, Q, R); //std::shared_ptr<aiforce::control::Controller> controller = std::make_shared<Stanley>();
 
 
     double cur_speed = controlInfo.speed;
 
-    vector<aiforce::decision::SinglePoint>::const_iterator cur_path_begin=controlInfo.pathPoints.begin(), cur_path_end;
-    cur_path_end = std::next(controlInfo.pathPoints.begin(), controlInfo.pathLength);
-    vector<aiforce::decision::SinglePoint> current_path_in_vehicle,current_path_in_world;
+    vector<aiforce::decision::SinglePoint>::const_iterator cur_path_begin=controlInfo.pathPoints.begin(), cur_path_end = std::next(controlInfo.pathPoints.begin(), controlInfo.pathLength);
+    vector<aiforce::decision::SinglePoint> current_path_in_world=slicing<aiforce::decision::SinglePoint>(cur_path_begin,cur_path_end);
+    controller->UpdatePath(current_path_in_world);
     vector<State> current_path_in_world_state;
-    current_path_in_world = slicing<aiforce::decision::SinglePoint>(cur_path_begin,cur_path_end);
-    current_path_in_vehicle = getPath(current_path_in_world);
+    vector<State> refer_path = controller->RefPath;
 
-    controller->UpdatePath(current_path_in_vehicle);
-    vector<State> ego_refer_path = controller->RefState_;
-
-    int path_index_now, path_total_index=controlInfo.pathPoints.size();
-    path_index_now = calTargetIndex(ego_state, ego_refer_path);
+    int path_index_now = calTargetIndex(ego_state, refer_path), path_total_index=controlInfo.pathPoints.size();
 
     double steer_angle;
 
 
     while (time_now<=time_length)
     {   
-        State ego_cur_state(L/2,0,0,this->psi_rate);
-        steer_angle = controller->steer(ego_cur_state, cur_speed, L, ego_refer_path);
+        State cur_state = getState();
+        steer_angle = controller->steer(cur_state, cur_speed, L, refer_path);
         Update(0, steer_angle);
         xout.emplace_back(this->x);
         yout.emplace_back(this->y);
@@ -151,9 +162,8 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
         cur_path_end = std::next(cur_path_begin, controlInfo.pathLength);
 
         current_path_in_world = slicing<aiforce::decision::SinglePoint>(cur_path_begin,cur_path_end);
-        current_path_in_vehicle = getPath(current_path_in_world); 
-        controller->UpdatePath(current_path_in_vehicle);
-        ego_refer_path = controller->RefState_;
+        controller->UpdatePath(current_path_in_world);
+        refer_path = controller->RefPath;
         time_now += 1;
     }
     this->crs_track_err = controller->crs_track_err;

@@ -1,7 +1,3 @@
-//
-// Created by LiuKai on 2023/06/25.
-//
-
 #include "KinematicModel.h"
 /**
  * 机器人运动学模型构造
@@ -32,16 +28,7 @@ void KinematicModel::Initialization(double x, double y, double psi, double v, do
 void KinematicModel::updateState(double accel, double delta_f) {
     x = x + v* cos(psi)*dt;
     y = y + v*sin(psi)*dt;
-//    std::cout<<"UUUUUpsi "<<psi<<std::endl;
-//    std::cout<<"UUUUUpsi "<<v<<std::endl;
-//    std::cout<<"UUUUUpsi "<<L<<std::endl;
-//    std::cout<<"UUUUUdelta_f "<<delta_f<<std::endl;
-
-    std::cout<<"UUUlast_psi "<<psi<<std::endl;
-
-
     psi = psi + v / L * tan(delta_f)*dt;
-    std::cout<<"UUUUUpsi "<<psi<<std::endl;
     v = v + accel*dt;
 }
 
