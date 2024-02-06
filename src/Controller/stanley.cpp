@@ -6,7 +6,7 @@
 Stanley::Stanley():aiforce::control::Controller(){
       this->k_psi = 1.0;
       this->k_lateral = 1;
-      this->k_soft = 0.0;
+      this->k_soft = 0.9;
       this->k_yaw_rate = 0;
       this->k_steer = 0;// not in use
       this->ki = -0.0;

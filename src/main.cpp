@@ -251,7 +251,7 @@ int main(int argc, char *argv[]) {
     gnuplotCmd_crs_track_err << "set title font \"Helvetica,18\" textcolor rgb \"blue\"\n";
     gnuplotCmd_crs_track_err << "set terminal epscairo enhanced color font 'Arial,12' size 5in,3in\n"; // 设置输出为EPS，指定输出文件尺寸和字体
     gnuplotCmd_crs_track_err << "set output 'cross_track_error.eps'\n";
-    gnuplotCmd_crs_track_err << "plot '"<<cross_track_error_file_name<<"' with linespoints title '"<<"cross track error"<<"\n";// 使用文件中的数据绘制图表
+    gnuplotCmd_crs_track_err << "plot '"<<cross_track_error_file_name<<"' with linespoints title '"<<"cross track error"<< "' lt 2 linecolor 2 ps 0.1"<<"\n";// 使用文件中的数据绘制图表
 
     // 调用GNUplot绘制图表
     FILE *gnuplotPipe_crs_track_err = popen("gnuplot -persistent", "w");
