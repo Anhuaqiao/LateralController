@@ -22,7 +22,8 @@ public:
     MatrixXd R;
 private:
     KinematicModel model;
-    
+    int N = 100;
+    double eps = 1.0e-4;
 public:
     LQR(double x, double y, double psi, double v, double L, double dt, MatrixXd Q, MatrixXd R);
     ~LQR() = default;

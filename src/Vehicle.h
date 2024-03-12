@@ -146,12 +146,7 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
 
     double steer_angle;
 
-    // Variable to store the total accumulation time
-    accumulation_time = 0;
-
-    // Your loop
-    for (int i = 0; i < 1000000; ++i) {
-
+    this->accumulation_time = 0;
     while (time_now<=time_length)
     {   
         State cur_state = getState();
@@ -179,6 +174,7 @@ void Vehicle::Simulator(double time_length, const ControlInfo & controlInfo){
     }
     this->crs_track_err = controller->crs_track_err;
     delete controller;
+    
  }
 
 #endif

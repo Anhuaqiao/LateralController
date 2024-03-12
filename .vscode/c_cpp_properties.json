@@ -3,7 +3,7 @@
         {
             "name": "Linux",
             "includePath": [
-                "/home/xiaohan/Simulation_Kinematics/LateralControl/**",
+                "/home/xiaohan/Work/Simulation_Kinematics/LateralControl/**",
                 "/usr/local/include/**"
             ],
             "defines": [],

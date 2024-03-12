@@ -261,7 +261,18 @@ int main(int argc, char *argv[]) {
     } else {
         std::cerr << "Error: Could not open GNUplot." << std::endl;
     }
+    
 
-    std::cout << "total controller running time: " << tractor.accumulation_time<<std::endl; 
+    std::chrono::nanoseconds duration(tractor.accumulation_time);
+
+    // Convert nanoseconds to seconds, milliseconds, and microseconds
+    auto minutes = std::chrono::duration_cast<std::chrono::minutes>(duration);
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(duration);
+    auto milliseconds = std::chrono::duration_cast<std::chrono::milliseconds>(duration);
+    auto microseconds = std::chrono::duration_cast<std::chrono::microseconds>(duration);
+ 
+
+
+    std::cout<<"controller time consumption: " << minutes.count()<<":"  << seconds.count()<<":"  << milliseconds.count()<<":"  << microseconds.count()<< std::endl;
     return 0;
 }

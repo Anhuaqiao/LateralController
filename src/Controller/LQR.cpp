@@ -9,13 +9,19 @@ LQR::LQR(double x, double y, double psi, double v, double L, double dt, MatrixXd
 }
 
 MatrixXd LQR::calRicatti(MatrixXd A, MatrixXd B, MatrixXd Q, MatrixXd R){
-    int it = 100;
-    MatrixXd P = Q;
-    for(int i = 0; i <= it; i++) {
-    P = Q + A.transpose() * P * A - A.transpose() * P * B * (B.transpose() * P * B + R).inverse() * B.transpose() * P * A;
-}
+    MatrixXd Qf= Q;
+    MatrixXd P = Qf;
+    MatrixXd P_;
+    for(int i=0;i<N;i++){
+        P_ = Q+A.transpose()*P*A-A.transpose()*P*B*(R+B.transpose()*P*B).inverse()*B.transpose()*P*A;
+        //小于预设精度时返回
+        if((P_-P).maxCoeff()<eps&&(P-P_).maxCoeff()<eps)break;
+        //if((P_-P).cwiseAbs().maxCoeff()<EPS)break;
 
-    return P;
+        P = P_;
+
+    }
+    return P_;
 }
 
 

@@ -10,12 +10,12 @@
         {
             "label": "build",
             "type": "shell",
-            "command": "~/Qt5.9.2/5.9.2/gcc_64/bin/qmake && make clean && make release -j8",
+            "command": "make -j8",
         },
         {
             "label": "build_debug",
             "type": "shell",
-            "command": "~/Qt5.9.2/5.9.2/gcc_64/bin/qmake && make clean && make debug -j8",
+            "command": "cd build&&cmake ..&& make clean && make -j8",
         },
         {
             "label": "clean",
